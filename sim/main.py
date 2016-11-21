@@ -65,7 +65,7 @@ def options():
 
 def get_default_options():
     default_options = options()
-    default_options["how_long"] = time_to_min(d=10)  # mi, h, d, y
+    default_options["how_long"] = time_to_min(d=5)  # mi, h, d, y
     default_options["how_many_people"] = 1000
     default_options["whats_the_weather"] = 'sunny'  # 'sunny', 'windy', 'rainy'
     default_options["when_it_happens"] = 'weekday'  # 'weekday', 'weekend', 'vacation'

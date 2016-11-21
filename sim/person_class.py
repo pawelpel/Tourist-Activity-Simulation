@@ -26,7 +26,7 @@ class Person(object):
         self.have_been_at_hotel = [False for _ in range(self.person_config["trip_duration"]//time_to_min(d=1))]
 
         # Handle the city
-        self.hotels = set(city_config["hotels"])
+        self.hotels = city_config["hotels"]
 
     def run(self):
         """

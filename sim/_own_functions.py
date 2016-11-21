@@ -45,7 +45,16 @@ def any_not(iterable):
 
 
 def sort_hotels(hotels):
-    return sorted(hotels, key=lambda x: x.hotel_popularity, reverse=True)
+    # return sorted(hotels, key=lambda x: x.hotel_popularity, reverse=True)
+    if random.choice(range(0, 3)):
+        tmp = sorted(hotels, key=lambda x: x.hotel_popularity, reverse=True)
+    else:
+        # Have some randomness in choosing hotel
+        # but still most of them chose by popularity
+        tmp = hotels[1:]
+        random.shuffle(tmp)
+        tmp.append(hotels[0])
+    return tmp
 
 
 def person_walking(self, s):

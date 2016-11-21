@@ -13,9 +13,6 @@ class Hotel(Resource):
         self.hotel_stars = stars
         self.hotel_popularity = popularity
 
-    def get_len_queue(self):
-        return len(self.queue)
-
     def get_empty_rooms(self):
         return self.capacity-self.count
 
@@ -31,8 +28,8 @@ def get_city_config(env):
     :return: dictionary
     """
     # Create Hotels  (name, list of beds in rooms, stars, popularity in %)
-    hilton = Hotel(env, "Hilton", [300], 5, 30)
-    puro_hotel = Hotel(env, "Puro Hotel", [150], 4, 67)
+    hilton = Hotel(env, "Hilton", [300], 5, 90)
+    puro_hotel = Hotel(env, "Puro Hotel", [150], 4, 50)
 
     # Make The City!
     city = {
