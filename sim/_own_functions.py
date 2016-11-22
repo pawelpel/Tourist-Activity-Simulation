@@ -6,7 +6,7 @@ from string import ascii_letters
 from functools import wraps
 
 # 1 print, 0 not print
-MUTE_PRINTING = 1
+MUTE_PRINTING = 0
 
 
 def pri(self, message=''):
@@ -59,16 +59,13 @@ def sort_hotels(hotels):
 
 def person_walking(self, s):
     if s:
-        self.env.walking_people.append(self)
+        self.env.walking_people += 1
     else:
-        self.env.walking_people.remove(self)
+        self.env.walking_people -= 1
 
 
-def check_if_trip_is_over(self):
-    if self.env.now >= self.person_config["arriving_time"] + self.person_config["trip_duration"]:
-        pri(self, "End of the trip. GOODBYE!")
-        return True
-    return False
+def check_if_trip_is_over(self, trip_duration):
+    return self.env.now >= trip_duration
 
 
 def check_time(self, start, end):
@@ -77,8 +74,10 @@ def check_time(self, start, end):
     if now > day:
         now -= (day * (now//day))
     if now <= day:
+        if start < end and start < now < end:
+            return True
         if now <= end <= start:
             return True
-        if now >= start:
+        if now >= start >= end:
             return True
     return False

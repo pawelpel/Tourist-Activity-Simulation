@@ -1,6 +1,5 @@
 #!/usr/bin/env python3.5
 import simpy
-from collections import deque
 
 from ._own_functions import time_to_min, time_it, min_to_date
 from .city_config import get_city_config
@@ -16,7 +15,7 @@ def run_simulation(options):
     city_config = get_city_config(env)
 
     # Who is curently walking
-    env.walking_people = deque()
+    env.walking_people = 0
 
     # Which month is it? To set statistics properly.
     env.month = options["month"]
@@ -41,12 +40,12 @@ def run_simulation(options):
 
             # Get city's attractions to prepare simulation's state raport
             for k in city_config["hotels"]:
-                hotels_report[k.hotel_name] = {"interaction_with": k.count}
+                hotels_report[k.hotel_name] = k.count
 
             # Creating simulations state raport
             report = {
                 "TIM": env_time,
-                "WP": len(env.walking_people),
+                "WP": env.walking_people,
                 "HR": hotels_report,
             }
 
@@ -67,7 +66,7 @@ def options():
 def get_default_options():
     default_options = options()
     default_options["how_long"] = time_to_min(d=3)  # mi, h, d, y
-    default_options["how_many_people"] = 1000
+    default_options["how_many_people"] = 100000
     default_options["whats_the_weather"] = 'sunny'  # 'sunny', 'windy', 'rainy'
     default_options["when_it_happens"] = 'weekday'  # 'weekday', 'weekend', 'vacation'
     default_options["month"] = 2
@@ -75,9 +74,14 @@ def get_default_options():
 
 
 def main_sim():
-    for r in run_simulation(get_default_options()):
-        # print(r)
-        pass
+    # for r in run_simulation(get_default_options()):
+    #     print(r)
+    #     pass
+
+    import cProfile
+
+    cProfile.run('for r in run_simulation(get_default_options()):\n\tpass')
+
 
 if __name__ == "__main__":
     main_sim()

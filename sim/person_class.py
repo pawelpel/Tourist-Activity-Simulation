@@ -27,6 +27,8 @@ class Person(object):
         self.random_wake_up_time = time_to_min(mi=rr.randint(5, 60))
         self.ranodm_how_long_can_walk = time_to_min(h=rr.randint(4, 6))
 
+        self.trip_duration_from_arriving = self.person_config["arriving_time"] + self.person_config["trip_duration"]
+
         # Handle the city
         self.hotels = sort_hotels(city_config["hotels"])
 
@@ -41,11 +43,11 @@ class Person(object):
 
         while True:
             # Is that the end of his trip?
-            if check_if_trip_is_over(self):
+            if check_if_trip_is_over(self, self.trip_duration_from_arriving):
                 break
 
             # Sleeping time ?
-            if check_time(self, time_to_min(h=21), time_to_min(h=5)):
+            if check_time(self, time_to_min(h=21), time_to_min(h=3)):
 
                 # Have need to sleep that night at hotel?
                 if any_not(self.have_been_at_hotel):
