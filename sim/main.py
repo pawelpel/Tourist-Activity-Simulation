@@ -21,6 +21,9 @@ def run_simulation(options):
     # Which month is it? To set statistics properly.
     env.month = options["month"]
 
+    # Init variables
+    hotels_report = {}
+
     # Create People using individual configuration
     for i in range(options["how_many_people"]):
         person_config = get_person_config(env, i)
@@ -37,16 +40,14 @@ def run_simulation(options):
         if last_env_time is not None and env_time != last_env_time:
 
             # Get city's attractions to prepare simulation's state raport
-            hotels_raport = {}
             for k in city_config["hotels"]:
-                hotels_raport[k.hotel_name] = {"interaction_with": k.count}
+                hotels_report[k.hotel_name] = {"interaction_with": k.count}
 
             # Creating simulations state raport
             report = {
                 "TIM": env_time,
-                "TIDF": str(min_to_date(env.now)),
                 "WP": len(env.walking_people),
-                "HR": hotels_raport,
+                "HR": hotels_report,
             }
 
             # Sending/Printing/Whatever
@@ -65,7 +66,7 @@ def options():
 
 def get_default_options():
     default_options = options()
-    default_options["how_long"] = time_to_min(d=5)  # mi, h, d, y
+    default_options["how_long"] = time_to_min(d=3)  # mi, h, d, y
     default_options["how_many_people"] = 1000
     default_options["whats_the_weather"] = 'sunny'  # 'sunny', 'windy', 'rainy'
     default_options["when_it_happens"] = 'weekday'  # 'weekday', 'weekend', 'vacation'
@@ -75,7 +76,7 @@ def get_default_options():
 
 def main_sim():
     for r in run_simulation(get_default_options()):
-        print(r)
+        # print(r)
         pass
 
 if __name__ == "__main__":

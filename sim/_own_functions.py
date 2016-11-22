@@ -6,7 +6,7 @@ from string import ascii_letters
 from functools import wraps
 
 # 1 print, 0 not print
-MUTE_PRINTING = 0
+MUTE_PRINTING = 1
 
 
 def pri(self, message=''):
@@ -50,7 +50,7 @@ def sort_hotels(hotels):
         tmp = sorted(hotels, key=lambda x: x.hotel_popularity, reverse=True)
     else:
         # Have some randomness in choosing hotel
-        # but still most of them chose by popularity
+        # but still most of them choose by popularity
         tmp = hotels[1:]
         random.shuffle(tmp)
         tmp.append(hotels[0])
@@ -62,3 +62,23 @@ def person_walking(self, s):
         self.env.walking_people.append(self)
     else:
         self.env.walking_people.remove(self)
+
+
+def check_if_trip_is_over(self):
+    if self.env.now >= self.person_config["arriving_time"] + self.person_config["trip_duration"]:
+        pri(self, "End of the trip. GOODBYE!")
+        return True
+    return False
+
+
+def check_time(self, start, end):
+    day = 24*60
+    now = self.env.now
+    if now > day:
+        now -= (day * (now//day))
+    if now <= day:
+        if now <= end <= start:
+            return True
+        if now >= start:
+            return True
+    return False

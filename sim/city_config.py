@@ -28,8 +28,11 @@ def get_city_config(env):
     :return: dictionary
     """
     # Create Hotels  (name, list of beds in rooms, stars, popularity in %)
-    hilton = Hotel(env, "Hilton", [300], 5, 90)
-    puro_hotel = Hotel(env, "Puro Hotel", [150], 4, 50)
+    hilton = Hotel(env, "Hilton", [230], 5, 90)
+    puro_hotel = Hotel(env, "Puro Hotel", [145], 4, 50)
+    dupons = Hotel(env, "Dupero", [9000], 2, 22)
+    kalwin = Hotel(env, "Kalwin", [550], 2, 62)
+    meder = Hotel(env, "Meder", [550], 4, 99)
 
     # Make The City!
     city = {
