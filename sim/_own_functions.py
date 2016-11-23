@@ -19,7 +19,7 @@ def min_to_date(mi):
 
 
 def time_to_min(mi=0, h=0, d=0, y=0):
-    return int(mi + h*60 + d*60*24 + y*60*24*365)
+    return mi + h*60 + d*60*24 + y*60*24*365
 
 
 def time_it(fun):
@@ -37,7 +37,7 @@ def generate_token():
     return ''.join(random.choice(ascii_letters) for _ in range(25))
 
 
-def any_not(iterable):
+def any_night(iterable):
     for element in iterable:
         if not element:
             return True
@@ -51,17 +51,13 @@ def sort_hotels(hotels):
     else:
         # Have some randomness in choosing hotel
         # but still most of them choose by popularity
-        tmp = hotels[1:]
+        tmp = hotels[:]
         random.shuffle(tmp)
-        tmp.append(hotels[0])
     return tmp
 
 
 def person_walking(self, s):
-    if s:
-        self.env.walking_people += 1
-    else:
-        self.env.walking_people -= 1
+    self.env.walking_people += s
 
 
 def check_if_trip_is_over(self, trip_duration):
@@ -74,7 +70,7 @@ def check_time(self, start, end):
     if now > day:
         now -= (day * (now//day))
     if now <= day:
-        if start < end and start < now < end:
+        if start <= now <= end:
             return True
         if now <= end <= start:
             return True
