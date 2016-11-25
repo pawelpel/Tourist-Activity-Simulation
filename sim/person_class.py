@@ -26,7 +26,7 @@ class Person(object):
         self.janusz_goes_to_sleep_at_min = time_to_min(h=self.janusz_goes_to_sleep_at_h)
         self.janusz_cant_go_to_sleep_at_min = time_to_min(h=(24 - self.janusz_goes_to_sleep_at_h + ra.randint(1, 4)))
 
-        self.janusz_nights_at_hotel = [False for _ in range(self.janusz_trip_duration // time_to_min(d=1))]
+        self.janusz_nights_at_hotel = [1 for _ in range(self.janusz_trip_duration // time_to_min(d=1))]
         self.janusz_sleeps_for_about_h = ra.randint(6, 8)
         self.janusz_sleeps_for_about_min = time_to_min(h=self.janusz_sleeps_for_about_h)
 
@@ -58,7 +58,7 @@ class Person(object):
             if check_time(self, self.janusz_goes_to_sleep_at_min, self.janusz_cant_go_to_sleep_at_min):
 
                 # Have need to sleep that night at hotel?
-                if any_night(self.janusz_nights_at_hotel):
+                if any(self.janusz_nights_at_hotel):
 
                     # Yes, so he is looking for a hotel
                     for hotel in self.hotels:
@@ -81,7 +81,6 @@ class Person(object):
                                 # Janusz goes to bed
                                 pri(self, "Sleeping for next {}h".format(self.janusz_sleeps_for_about_h))
                                 yield self.env.timeout(self.janusz_sleeps_for_about_min)
-                                self.janusz_nights_at_hotel.pop()
 
                                 # Janusz wake up
                                 pri(self, "Time to wake up")
@@ -94,6 +93,9 @@ class Person(object):
                         # No there is not any bed for him
                         else:
                             pri(self, "No place to sleep at {}".format(hotel.hotel_name))
+
+                    # Night is over
+                    self.janusz_nights_at_hotel.pop()
 
             # No, its not sleeping time
             pri(self, "Walking")

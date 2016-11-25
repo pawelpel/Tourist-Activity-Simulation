@@ -6,7 +6,7 @@ from string import ascii_letters
 from functools import wraps
 
 # 1 print, 0 not print
-MUTE_PRINTING = 0
+MUTE_PRINTING = 1
 
 
 def pri(self, message=''):
@@ -35,13 +35,6 @@ def time_it(fun):
 def generate_token():
     random.seed(time.time())
     return ''.join(random.choice(ascii_letters) for _ in range(25))
-
-
-def any_night(iterable):
-    for element in iterable:
-        if not element:
-            return True
-    return False
 
 
 def sort_hotels(hotels):

@@ -66,7 +66,7 @@ def options():
 def get_default_options():
     default_options = options()
     default_options["how_long"] = time_to_min(d=3)  # mi, h, d, y
-    default_options["how_many_people"] = 100000
+    default_options["how_many_people"] = 1000
     default_options["whats_the_weather"] = 'sunny'  # 'sunny', 'windy', 'rainy'
     default_options["when_it_happens"] = 'weekday'  # 'weekday', 'weekend', 'vacation'
     default_options["month"] = 2
@@ -74,13 +74,12 @@ def get_default_options():
 
 
 def main_sim():
-    # for r in run_simulation(get_default_options()):
-    #     print(r)
+    for r in run_simulation(get_default_options()):
+        print(r)
     #     pass
 
-    import cProfile
-
-    cProfile.run('for r in run_simulation(get_default_options()):\n\tpass')
+    # import cProfile
+    # cProfile.run('for r in run_simulation(get_default_options()):\n\tpass')
 
 
 if __name__ == "__main__":

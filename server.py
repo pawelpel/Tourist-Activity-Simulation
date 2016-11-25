@@ -42,14 +42,14 @@ class Application(tornado.web.Application):
 
 def main():
     app = Application()
-    app.listen(8888, address='192.168.1.10')
+    app.listen(8888, address='127.0.0.1')
     IOLoop.instance().start()
 
 
 if __name__ == '__main__':
 
     # To run server
-    # main()
+    main()
 
     # To run simulation
-    main_sim()
+    # main_sim()
