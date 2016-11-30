@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.5
 import simpy
 
-from ._own_functions import time_to_min, time_it, min_to_date
+from ._own_functions import time_to_min, time_it
 from .city_config import get_city_config
 from .person_class import Person
 from .person_config import get_person_config
