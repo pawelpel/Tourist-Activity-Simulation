@@ -38,7 +38,7 @@ def generate_token():
     return ''.join(random.choice(ascii_letters) for _ in range(25))
 
 
-def sort_city_object_by_popularity(objs):
+def sort_city_objects_by_popularity(objs):
     if random.choice(range(0, 3)):
         tmp = sorted(objs, key=lambda x: x.popularity, reverse=True)
     else:
@@ -82,7 +82,7 @@ def calculate_walking_time(from_pos, to_pos, avg_meters_in_min):
     return distance//avg_meters_in_min + 1
 
 
-def sort_city_object_by_nearest_pos(objs, from_pos):
+def sort_city_objects_by_nearest_pos(objs, from_pos):
     if random.choice(range(0, 3)):
         tmp = sorted(objs, key=lambda x: calculate_distance(from_pos, x.position))
     else:

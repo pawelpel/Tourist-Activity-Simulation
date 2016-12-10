@@ -39,8 +39,8 @@ class Person(object):
         self.person_last_position = self.person_config["first_position"]
 
         # # Handle the city
-        self.hotels = sort_city_object_by_popularity(city_config["hotels"])
-        self.restaurants = sort_city_object_by_popularity(city_config["restaurants"])
+        self.hotels = sort_city_objects_by_popularity(city_config["hotels"])
+        self.restaurants = sort_city_objects_by_popularity(city_config["restaurants"])
 
     def run(self):
         """
@@ -61,7 +61,7 @@ class Person(object):
                 if any(self.person_nights_at_hotel):
 
                     # Yes, so he is looking for a hotel
-                    self.hotels = sort_city_object_by_nearest_pos(self.hotels, self.person_last_position)
+                    self.hotels = sort_city_objects_by_nearest_pos(self.hotels, self.person_last_position)
                     for hotel in self.hotels:
 
                         # Found one, so he is going to that hotel
@@ -74,6 +74,9 @@ class Person(object):
                         person_walking(self, 1)
                         yield self.env.timeout(how_long_going_to_hotel)
                         person_walking(self, -1)
+
+                        # Update position
+                        self.person_last_position = hotel.position
 
                         # Is there place for him to sleep there?
                         if hotel.get_empty_rooms() > 0:
