@@ -14,7 +14,11 @@ def run_simulation(options):
     env = simpy.Environment()
     city_config = get_city_config(env)
 
-    # Who is curently walking
+    # How big is the map
+    env.map_size_x = options["map_size_x"]
+    env.map_size_y = options["map_size_y"]
+
+    # How many people are curently walking
     env.walking_people = 0
 
     # Which month is it? To set statistics properly.
@@ -22,6 +26,7 @@ def run_simulation(options):
 
     # Init variables
     hotels_report = {}
+    restaurants_report = {}
 
     # Create People using individual configuration
     for i in range(options["how_many_people"]):
@@ -41,12 +46,15 @@ def run_simulation(options):
             # Get city's attractions to prepare simulation's state raport
             for k in city_config["hotels"]:
                 hotels_report[k.hotel_name] = k.count
+            for r in city_config["restaurants"]:
+                restaurants_report[r.restaurant_name] = r.count
 
             # Creating simulations state raport
             report = {
                 "TIM": env_time,
                 "WP": env.walking_people,
                 "HR": hotels_report,
+                "RR": restaurants_report,
             }
 
             # Sending/Printing/Whatever
@@ -56,7 +64,9 @@ def run_simulation(options):
 
 
 def options():
-    return {'how_long': None,
+    return {'map_size_x': None,
+            'map_size_y': None,
+            'how_long': None,
             'how_many_people': None,
             'whats_the_weather': None,
             'when_it_happens': None,
@@ -65,8 +75,10 @@ def options():
 
 def get_default_options():
     default_options = options()
+    default_options["map_size_x"] = 10
+    default_options["map_size_y"] = 10
     default_options["how_long"] = time_to_min(d=3)  # mi, h, d, y
-    default_options["how_many_people"] = 1000
+    default_options["how_many_people"] = 10
     default_options["whats_the_weather"] = 'sunny'  # 'sunny', 'windy', 'rainy'
     default_options["when_it_happens"] = 'weekday'  # 'weekday', 'weekend', 'vacation'
     default_options["month"] = 2
@@ -75,8 +87,8 @@ def get_default_options():
 
 def main_sim():
     for r in run_simulation(get_default_options()):
-        print(r)
-    #     pass
+        # print(r)
+        pass
 
     # import cProfile
     # cProfile.run('for r in run_simulation(get_default_options()):\n\tpass')

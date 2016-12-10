@@ -44,12 +44,16 @@ def get_person_config(env, i):
     if not duration:
         duration = time_to_min(h=random.randint(3, 24 * 7))
 
+    # First position
+    first_position = (random.randint(0, env.map_size_x), random.randint(0, env.map_size_y))
+
     # Set personal configuration
     peron_config = {
         "name": name,
         "person_is_pl": person_is_pl,
         "arriving_time": arriving_time,
         "trip_duration": duration,
+        "first_position": first_position,
     }
 
     return peron_config

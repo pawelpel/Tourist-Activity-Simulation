@@ -2,6 +2,7 @@
 import time
 import datetime
 import random
+import math
 from string import ascii_letters
 from functools import wraps
 
@@ -37,14 +38,13 @@ def generate_token():
     return ''.join(random.choice(ascii_letters) for _ in range(25))
 
 
-def sort_hotels(hotels):
-    # return sorted(hotels, key=lambda x: x.hotel_popularity, reverse=True)
+def sort_city_object_by_popularity(objs):
     if random.choice(range(0, 3)):
-        tmp = sorted(hotels, key=lambda x: x.hotel_popularity, reverse=True)
+        tmp = sorted(objs, key=lambda x: x.popularity, reverse=True)
     else:
-        # Have some randomness in choosing hotel
+        # Have some randomness in choosing obj
         # but still most of them choose by popularity
-        tmp = hotels[:]
+        tmp = objs[:]
         random.shuffle(tmp)
     return tmp
 
@@ -70,3 +70,24 @@ def check_time(self, start, end):
         if now >= start >= end:
             return True
     return False
+
+
+def calculate_distance(from_pos, to_pos):
+    return math.sqrt((to_pos[0]-from_pos[0])**2 + (to_pos[1]-from_pos[1])**2)
+
+
+def calculate_walking_time(from_pos, to_pos, avg_meters_in_min):
+    distance = calculate_distance(from_pos, to_pos)
+    # print("Distance "+str(int(distance)))
+    return distance//avg_meters_in_min + 1
+
+
+def sort_city_object_by_nearest_pos(objs, from_pos):
+    if random.choice(range(0, 3)):
+        tmp = sorted(objs, key=lambda x: calculate_distance(from_pos, x.position))
+    else:
+        # Have some randomness in choosing object
+        # but still most of them choose by position
+        tmp = objs[:]
+        random.shuffle(tmp)
+    return tmp

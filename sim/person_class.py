@@ -17,56 +17,62 @@ class Person(object):
         self.name = self.person_config["name"]
 
         # trip
-        self.janusz_arriving_time = self.person_config["arriving_time"]
-        self.janusz_trip_duration = self.person_config["trip_duration"]
-        self.janusz_actual_trip_duration = self.janusz_arriving_time + self.janusz_trip_duration
+        self.person_arriving_time = self.person_config["arriving_time"]
+        self.person_trip_duration = self.person_config["trip_duration"]
+        self.person_actual_trip_duration = self.person_arriving_time + self.person_trip_duration
 
         # hotel
-        self.janusz_goes_to_sleep_at_h = ra.randint(21, 24)
-        self.janusz_goes_to_sleep_at_min = time_to_min(h=self.janusz_goes_to_sleep_at_h)
-        self.janusz_cant_go_to_sleep_at_min = time_to_min(h=(24 - self.janusz_goes_to_sleep_at_h + ra.randint(1, 4)))
+        self.person_goes_to_sleep_at_h = ra.randint(21, 24)
+        self.person_goes_to_sleep_at_min = time_to_min(h=self.person_goes_to_sleep_at_h)
+        self.person_cant_go_to_sleep_at_min = time_to_min(h=(24 - self.person_goes_to_sleep_at_h + ra.randint(1, 4)))
 
-        self.janusz_nights_at_hotel = [1 for _ in range(self.janusz_trip_duration // time_to_min(d=1))]
-        self.janusz_sleeps_for_about_h = ra.randint(6, 8)
-        self.janusz_sleeps_for_about_min = time_to_min(h=self.janusz_sleeps_for_about_h)
+        self.person_nights_at_hotel = [1 for _ in range(self.person_trip_duration // time_to_min(d=1))]
+        self.person_sleeps_for_about_h = ra.randint(6, 8)
+        self.person_sleeps_for_about_min = time_to_min(h=self.person_sleeps_for_about_h)
 
         # walking
-        self.janusz_avg_siqghtseeing_time = time_to_min(h=ra.randint(3, 5))
-        self.janusz_avg_walking_time = time_to_min(mi=ra.randint(3, 15))
+        self.person_avg_sightseeing_time = time_to_min(h=ra.randint(3, 5))
+        self.person_avg_meters_in_min = ra.randint(3, 6)*1000//60
 
         # global actions
-        self.janusz_avg_organization_time = time_to_min(mi=ra.randint(5, 15))
+        self.person_avg_organization_time = time_to_min(mi=ra.randint(5, 15))
+        self.person_last_position = self.person_config["first_position"]
 
         # # Handle the city
-        self.hotels = sort_hotels(city_config["hotels"])
+        self.hotels = sort_city_object_by_popularity(city_config["hotels"])
+        self.restaurants = sort_city_object_by_popularity(city_config["restaurants"])
 
     def run(self):
         """
             Main loop to handle person behaviour.
         """
-
         # Janusz arriving to the city
-        yield self.env.timeout(self.janusz_arriving_time)
+        yield self.env.timeout(self.person_arriving_time)
         pri(self, "Arrived")
 
         while True:
             # Is that the end of his trip?
-            if check_if_trip_is_over(self, self.janusz_actual_trip_duration):
+            if check_if_trip_is_over(self, self.person_actual_trip_duration):
                 break
 
             # Sleeping time ?
-            if check_time(self, self.janusz_goes_to_sleep_at_min, self.janusz_cant_go_to_sleep_at_min):
-
+            if check_time(self, self.person_goes_to_sleep_at_min, self.person_cant_go_to_sleep_at_min):
                 # Have need to sleep that night at hotel?
-                if any(self.janusz_nights_at_hotel):
+                if any(self.person_nights_at_hotel):
 
                     # Yes, so he is looking for a hotel
+                    self.hotels = sort_city_object_by_nearest_pos(self.hotels, self.person_last_position)
                     for hotel in self.hotels:
 
                         # Found one, so he is going to that hotel
-                        pri(self, "Going to hotel: {}".format(hotel.hotel_name))
+                        how_long_going_to_hotel = calculate_walking_time(self.person_last_position, hotel.position,
+                                                                         self.person_avg_meters_in_min)
+                        pri(self, "Going to hotel: {}, from {}, to {}, in time: {}".format(hotel.hotel_name,
+                                                                                           self.person_last_position,
+                                                                                           hotel.position,
+                                                                                           how_long_going_to_hotel))
                         person_walking(self, 1)
-                        yield self.env.timeout(self.janusz_avg_walking_time)
+                        yield self.env.timeout(how_long_going_to_hotel)
                         person_walking(self, -1)
 
                         # Is there place for him to sleep there?
@@ -76,15 +82,15 @@ class Person(object):
                                 # There is a bed for him
                                 pri(self, "Booking time at: {}".format(hotel.hotel_name))
                                 yield req
-                                yield self.env.timeout(self.janusz_avg_organization_time)
+                                yield self.env.timeout(self.person_avg_organization_time)
 
                                 # Janusz goes to bed
-                                pri(self, "Sleeping for next {}h".format(self.janusz_sleeps_for_about_h))
-                                yield self.env.timeout(self.janusz_sleeps_for_about_min)
+                                pri(self, "Sleeping for next {}h".format(self.person_sleeps_for_about_h))
+                                yield self.env.timeout(self.person_sleeps_for_about_min)
 
                                 # Janusz wake up
                                 pri(self, "Time to wake up")
-                                yield self.env.timeout(self.janusz_avg_organization_time)
+                                yield self.env.timeout(self.person_avg_organization_time)
 
                                 # Leeaving the hotel
                                 pri(self, "Leaving {}".format(hotel.hotel_name))
@@ -95,12 +101,12 @@ class Person(object):
                             pri(self, "No place to sleep at {}".format(hotel.hotel_name))
 
                     # Night is over
-                    self.janusz_nights_at_hotel.pop()
+                    self.person_nights_at_hotel.pop()
 
             # No, its not sleeping time
             pri(self, "Walking")
             person_walking(self, 1)
-            yield self.env.timeout(self.janusz_avg_siqghtseeing_time)
+            yield self.env.timeout(self.person_avg_sightseeing_time)
             person_walking(self, -1)
 
             # TODO eating, sightseeing, museums, other atractions

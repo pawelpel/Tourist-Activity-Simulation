@@ -29,7 +29,7 @@ class MainHandler(BaseHandler):
         # Iter over all simulation and send all
         runner = run_simulation(self.get_user_options())
         for i, r in enumerate(runner):
-            self.write(simplejson.dumps([i, r]))
+            self.write(simplejson.dumps([i, r])+"\n",)
 
 
 class Application(tornado.web.Application):
@@ -49,7 +49,7 @@ def main():
 if __name__ == '__main__':
 
     # To run server
-    main()
+    # main()
 
     # To run simulation
-    # main_sim()
+    main_sim()
