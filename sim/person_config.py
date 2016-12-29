@@ -8,7 +8,9 @@ from ._own_functions import time_to_min
 
 
 def get_person_config(env, i):
-
+    """
+        Returns dict with generated data (from statisticks) about one person.
+    """
     name = "Person {}".format(i+1)
     arriving_time = random.randint(0, 12 * 60)
 

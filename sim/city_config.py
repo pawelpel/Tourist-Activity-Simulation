@@ -1,5 +1,6 @@
 #!/usr/bin/env python3.5
 from simpy import Resource
+import simplejson
 
 
 class Hotel(Resource):
@@ -7,7 +8,7 @@ class Hotel(Resource):
         Each Hotel has own position, name, rooms(with beds capacity), popularity.
     """
     def __init__(self, env, position, name, rooms, stars, popularity):
-        super().__init__(env, capacity=sum(r for r in rooms))
+        super().__init__(env, capacity=rooms)
         self.position = position
         self.hotel_name = name
         self.hotel_stars = stars
@@ -31,7 +32,8 @@ class Restaurant(Resource):
 
 def get_city_config(env):
     """
-    Returns dictionary with city config.
+    Returns dictionary with city config created from city_config.json
+    or not.
 
     It contains lists of instances of hotels, restaurants, cinema, places
     which can be visited by tourists.
@@ -39,19 +41,32 @@ def get_city_config(env):
     :param env:  simpy.Environment
     :return: dictionary
     """
-    # Create Hotels  (name, list of beds in rooms, stars, popularity in %)
-    hilton = Hotel(env, (10, 0), "Hilton", [230], 5, 90)
-    puro_hotel = Hotel(env, (0, 10), "Puro Hotel", [145], 4, 50)
-    majkel_hotel = Hotel(env, (0, 0), "Majkel Hotel", [145], 4, 50)
-    dupcio_hotel = Hotel(env, (10, 10), "Dupcio Hotel", [145], 4, 50)
+    hotels = []
+    restaurants = []
+
+    # Create Hotels (name, list of beds in rooms, stars, popularity in %)
+    try:
+        # todo change path to be more elastic
+        file = open('city_config.json', 'rb')
+        print('City config has been read!')
+        city_from_file = simplejson.load(file)
+
+        for h in city_from_file["hotels"]:
+            hotels.append(Hotel(env, (h[0], h[1]), *h[2:6]))
+
+        for r in city_from_file["restaurants"]:
+            restaurants.append(Restaurant(env, *r))
+
+    except FileNotFoundError:
+        hotels.append(Hotel(env, (10, 0), "Hilton", 230, 5, 90))
+        hotels.append(Hotel(env, (0, 10), "Puro Hotel", 145, 4, 50))
+        hotels.append(Hotel(env, (0, 0), "Majkel Hotel", 145, 4, 50))
+        hotels.append(Hotel(env, (10, 10), "Dupcio Hotel", 145, 4, 50))
 
     # Make The City!
     city = {
-        "hotels": [hilton, puro_hotel, majkel_hotel, dupcio_hotel],
-        "restaurants": [],
-        "cinema": [],
-        "museums": [],
-        "shops": [],
+        "hotels": hotels,
+        "restaurants": restaurants,
     }
 
     return city
