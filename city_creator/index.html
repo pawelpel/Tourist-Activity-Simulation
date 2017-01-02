@@ -1,0 +1,44 @@
+<!doctype html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">     
+        <title>City Creator</title>
+        <meta name="description" content="City Creator">
+        <meta name="author" content="pawelpel">
+        <link rel="stylesheet" href="css/style.css">
+      
+        <script src="js/jquery-3.1.1.min.js"></script>
+        <script src="js/jquery-ui.min.js"></script>
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
+        <script>
+          hljs.initHighlightingOnLoad();</script>
+        <script src="js/p5.min.js"></script>
+        <script src="js/city_creator.js"></script>
+    </head>
+    
+    <body>
+      
+        <div id="sketch-holder">
+          <!-- Our sketch will go here! -->
+        </div>
+        <div id="dialog" title="Create new place">
+          <div id="indialog">
+            Type: <select id="myselect">
+              <option value="hotel">hotel</option>
+              <option value="museum">museum</option>
+              <option value="restaurant">restaurat</option>
+              <option value="shop">shop</option>
+            </select><br />
+            Name: <input class="name" type="text"/><br />
+            Capaticy: <input class="capaticy" type="text"/><br />
+            Popularity: <input class="popularity" type="text"/><br />
+            <button class="save">Save</button><br />
+          </div>
+        </div>
+        <br />
+      <div><pre><code id="json_file" style="width: 1422px; height: 400px;"></code></pre></div>
+    </body>
+
+</html>

@@ -1,0 +1,9 @@
+#indialog {
+  background-color: white;
+  padding: 20px;
+  opacity: 0.95;
+}
+
+#dialog {
+  display: none;
+}
