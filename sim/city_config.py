@@ -7,11 +7,10 @@ class Hotel(Resource):
     """
         Each Hotel has own position, name, rooms(with beds capacity), popularity.
     """
-    def __init__(self, env, position, name, rooms, stars, popularity):
+    def __init__(self, env, position, name, rooms, popularity):
         super().__init__(env, capacity=rooms)
         self.position = position
         self.hotel_name = name
-        self.hotel_stars = stars
         self.popularity = popularity
 
     def get_empty_rooms(self):
@@ -58,10 +57,10 @@ def get_city_config(env):
             restaurants.append(Restaurant(env, *r))
 
     except FileNotFoundError:
-        hotels.append(Hotel(env, (10, 0), "Hilton", 230, 5, 90))
-        hotels.append(Hotel(env, (0, 10), "Puro Hotel", 145, 4, 50))
-        hotels.append(Hotel(env, (0, 0), "Majkel Hotel", 145, 4, 50))
-        hotels.append(Hotel(env, (10, 10), "Dupcio Hotel", 145, 4, 50))
+        hotels.append(Hotel(env, (10, 0), "Hilton", 230, 90))
+        hotels.append(Hotel(env, (0, 10), "Puro Hotel", 145, 50))
+        hotels.append(Hotel(env, (0, 0), "Majkel Hotel", 145, 50))
+        hotels.append(Hotel(env, (10, 10), "Dupcio Hotel", 145, 50))
 
     # Make The City!
     city = {
