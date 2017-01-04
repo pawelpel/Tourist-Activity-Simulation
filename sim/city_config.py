@@ -92,14 +92,14 @@ def get_city_config(env):
                 hotels.append(Hotel(env,
                                     (place["x_m"], place["y_m"]),
                                     place["name"],
-                                    int(place["capaticy"]),
+                                    int(place["capacity"]),
                                     int(place["popularity"])))
 
-            elif place["type"] == "restaurat":
+            elif place["type"] == "restaurant":
                 restaurants.append(Restaurant(env,
                                               (place["x_m"], place["y_m"]),
                                               place["name"],
-                                              int(place["capaticy"]),
+                                              int(place["capacity"]),
                                               int(place["popularity"]),
                                               convert_time_to_min(place["open_from"]),
                                               convert_time_to_min(place["open_to"]),
@@ -109,7 +109,7 @@ def get_city_config(env):
                 museums.append(Musuem(env,
                                       (place["x_m"], place["y_m"]),
                                       place["name"],
-                                      int(place["capaticy"]),
+                                      int(place["capacity"]),
                                       int(place["popularity"]),
                                       convert_time_to_min(place["open_from"]),
                                       convert_time_to_min(place["open_to"]),
