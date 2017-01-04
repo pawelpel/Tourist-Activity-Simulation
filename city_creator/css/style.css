@@ -7,3 +7,9 @@
 #dialog {
   display: none;
 }
+
+.indialog {
+  background-color: white;
+  padding: 20px;
+  opacity: 0.95;
+}

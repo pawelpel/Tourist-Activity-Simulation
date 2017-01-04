@@ -1,6 +1,6 @@
 var bg;
 var places = [];
-var size_of_objects = 15;
+var size_of_objects = 10;
 
 var opened = false;
 var saver_inited = false;
@@ -8,8 +8,15 @@ var tmp_x, tmp_y = 0;
 
 var last_len = places.length;
 
-
 function setup() {
+  frameRate(5);
+  $('#reset').on('click', function(){
+    console.log('xD');
+    places = [];
+    last_len = places.length;
+    localStorage.clear();
+    $('#json_file').text('');
+});
   bg = loadImage("stare_miasto_krakow.png");
   var canvas = createCanvas(1000, 1422);
   canvas.parent('sketch-holder');
@@ -51,6 +58,38 @@ const opt = {
                 opened = false; }
             };
 
+function mouseMoved() {
+  $('.toDelete').remove();
+  for(var p=0; p<places.length; p++){
+    if(abs(places[p].x - mouseX) < size_of_objects && abs(places[p].y - mouseY) < size_of_objects){
+              var x = mouseX + 'px';
+              var y = mouseY + 'px';
+              var tmplace = places[p];
+              var span = $('<p>').html('Type: '+tmplace.type+'<br />'+   
+                                          'Name: '+tmplace.name+'<br />'+
+                                          'Capacity: '+ tmplace.capaticy+'<br />'+
+                                          'Popularity: '+ tmplace.popularity+'<br />'+
+                                          'x: '+tmplace.x+'<br />'+
+                                          'y: '+tmplace.y+'<br />'+
+                                          'x_m: '+tmplace.x_m+'<br />'+
+                                          'x_y: '+tmplace.y_m+'<br />'+
+                                          'Open Form: '+tmplace.open_from+'<br />'+
+                                          'Open To: '+tmplace.open_to+'<br />'+
+                                          'VisitTime: '+tmplace.visittime+'<br />');
+              var div = $('<div>').css({
+                  "position": "absolute",                    
+                  "left": x,
+                  "top": y,
+              }).addClass('toDelete').addClass('indialog');
+              div.append(span);
+              $(document.body).append(div);    
+    }
+  }
+}
+
+
+
+
 function mouseClicked() {
   if(!opened){
     if(mouseX >= 0 && mouseX <= width){
@@ -77,13 +116,16 @@ function saver() {
           console.log('SAVING!');
           places.push({
             type: $( "#myselect option:selected" ).text(),
-            x_m: floor((tmp_x*590)/1000),
-            y_m: floor((tmp_y*590)/1000),
-            x: tmp_x,
-            y: tmp_y,
+            x_m: floor((tmp_x*590*2)/1000),
+            y_m: floor((tmp_y*590*2)/1000),
+            x: floor(tmp_x),
+            y: floor(tmp_y),
             name: $('.name').val(),
-            capaticy: $('.capaticy').val(),
+            capaticy: $('.capacity').val(),
             popularity: $('.popularity').val(),
+            open_from: $('.open_from').val(),
+            open_to: $('.open_to').val(),
+            visittime: $('.visittime').val()
           });
   
           $("#dialog").dialog(opt).dialog("close");
