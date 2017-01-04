@@ -49,7 +49,7 @@ def main():
 if __name__ == '__main__':
 
     # To run server
-    # main()
+    main()
 
     # To run simulation
-    main_sim()
+    # main_sim()

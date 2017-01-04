@@ -2,11 +2,14 @@
 from simpy import Resource
 import simplejson
 
+from ._own_functions import check_time_2, convert_time_to_min
+
 
 class Hotel(Resource):
     """
         Each Hotel has own position, name, rooms(with beds capacity), popularity.
     """
+
     def __init__(self, env, position, name, rooms, popularity):
         super().__init__(env, capacity=rooms)
         self.position = position
@@ -14,19 +17,51 @@ class Hotel(Resource):
         self.popularity = popularity
 
     def get_empty_rooms(self):
-        return self.capacity-self.count
+        return self.capacity - self.count
 
 
 class Restaurant(Resource):
     """
         Each Restaurant has own position, name, chairs(capacity of people who can be eat there at the
-        same time), queue, popularity.
+        same time), queue, popularity, time when it is opened and statistical visit time.
     """
-    def __init__(self, env, position, name, chairs, popularity):
+
+    def __init__(self, env, position, name, chairs, popularity, open_from, open_to, visit_time):
         super().__init__(env, capacity=chairs)
         self.position = position
-        self.restaurat_name = name
+        self.restaurant_name = name
         self.popularity = popularity
+        self.open_from = open_from
+        self.open_to = open_to
+        self.visit_time = visit_time
+
+    def is_opened(self, env):
+        return check_time_2(env, self.open_from, self.open_to)
+
+    def is_crowded(self):
+        return (self.capacity - self.count) < self.capacity * 0.1
+
+
+class Musuem(Resource):
+    """
+        Each Museum has own position, name, capacity of people who can be eat there at the
+        same time, queue, popularity, time when it is opened and statistical visit time.
+    """
+
+    def __init__(self, env, position, name, capacity, popularity, open_from, open_to, visit_time):
+        super().__init__(env, capacity=capacity)
+        self.position = position
+        self.museum_name = name
+        self.popularity = popularity
+        self.open_from = open_from
+        self.open_to = open_to
+        self.visit_time = visit_time
+
+    def is_opened(self, env):
+        return check_time_2(env, self.open_from, self.open_to)
+
+    def is_crowded(self):
+        return (self.capacity - self.count) < self.capacity * 0.1
 
 
 def get_city_config(env):
@@ -40,8 +75,10 @@ def get_city_config(env):
     :param env:  simpy.Environment
     :return: dictionary
     """
+
     hotels = []
     restaurants = []
+    museums = []
 
     # Create Hotels (name, list of beds in rooms, stars, popularity in %)
     try:
@@ -50,22 +87,45 @@ def get_city_config(env):
         print('City config has been read!')
         city_from_file = simplejson.load(file)
 
-        for h in city_from_file["hotels"]:
-            hotels.append(Hotel(env, (h[0], h[1]), *h[2:6]))
+        for place in city_from_file:
+            if place["type"] == "hotel":
+                hotels.append(Hotel(env,
+                                    (place["x_m"], place["y_m"]),
+                                    place["name"],
+                                    int(place["capaticy"]),
+                                    int(place["popularity"])))
 
-        for r in city_from_file["restaurants"]:
-            restaurants.append(Restaurant(env, *r))
+            elif place["type"] == "restaurat":
+                restaurants.append(Restaurant(env,
+                                              (place["x_m"], place["y_m"]),
+                                              place["name"],
+                                              int(place["capaticy"]),
+                                              int(place["popularity"]),
+                                              convert_time_to_min(place["open_from"]),
+                                              convert_time_to_min(place["open_to"]),
+                                              convert_time_to_min(place["visittime"])))
+
+            elif place["type"] == "museum":
+                museums.append(Musuem(env,
+                                      (place["x_m"], place["y_m"]),
+                                      place["name"],
+                                      int(place["capaticy"]),
+                                      int(place["popularity"]),
+                                      convert_time_to_min(place["open_from"]),
+                                      convert_time_to_min(place["open_to"]),
+                                      convert_time_to_min(place["visittime"])))
 
     except FileNotFoundError:
-        hotels.append(Hotel(env, (10, 0), "Hilton", 230, 90))
-        hotels.append(Hotel(env, (0, 10), "Puro Hotel", 145, 50))
-        hotels.append(Hotel(env, (0, 0), "Majkel Hotel", 145, 50))
-        hotels.append(Hotel(env, (10, 10), "Dupcio Hotel", 145, 50))
+        hotels.append(Hotel(env, (10, 0), "Blach Hotel", 230, 90))
+        hotels.append(Hotel(env, (0, 10), "Duda Hotel", 145, 50))
+        hotels.append(Hotel(env, (0, 0), "Gawrys Hotel", 145, 50))
+        hotels.append(Hotel(env, (10, 10), "Najder Hotel", 145, 50))
 
     # Make The City!
     city = {
         "hotels": hotels,
         "restaurants": restaurants,
+        "museums": museums,
     }
 
     return city

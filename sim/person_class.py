@@ -57,7 +57,6 @@ class Person(object):
         while True:
             # Is that the end of his trip?
             if check_if_trip_is_over(self, self.person_leaving_time):
-                pri(self, "Leaving the town.")
                 break
 
             # Sleeping time ?

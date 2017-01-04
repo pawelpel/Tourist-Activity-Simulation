@@ -27,6 +27,7 @@ def run_simulation(options):
     # Init variables for report
     hotels_report = {}
     restaurants_report = {}
+    museums_report = {}
 
     # Create People using individual configuration
     for i in range(options["how_many_people"]):
@@ -47,7 +48,9 @@ def run_simulation(options):
             for k in city_config["hotels"]:
                 hotels_report[k.hotel_name] = k.count
             for r in city_config["restaurants"]:
-                restaurants_report[r.restaurant_name] = r.count
+                restaurants_report[r.restaurant_name] = (r.count, int(r.is_opened(env)), int(r.is_crowded()))
+            for m in city_config["museums"]:
+                museums_report[m.museum_name] = (m.count, int(m.is_opened(env)), int(m.is_crowded()))
 
             # Creating simulations state report
             report = {
@@ -55,6 +58,7 @@ def run_simulation(options):
                 "WP": env.walking_people,
                 "HR": hotels_report,
                 "RR": restaurants_report,
+                "MR": museums_report
             }
 
             # Sending/Printing/Whatever connected with report
@@ -75,10 +79,10 @@ def options():
 
 def get_default_options():
     default_options = options()
-    default_options["map_size_x"] = 1000
-    default_options["map_size_y"] = 1000
+    default_options["map_size_x"] = 2000*590//1000  # px * 590//1000
+    default_options["map_size_y"] = 2844*590//1000
     default_options["how_long"] = time_to_min(d=3)  # mi, h, d, y
-    default_options["how_many_people"] = 100
+    default_options["how_many_people"] = 10000
     default_options["whats_the_weather"] = 'sunny'  # 'sunny', 'windy', 'rainy'
     default_options["when_it_happens"] = 'weekday'  # 'weekday', 'weekend', 'vacation'
     default_options["month"] = 2
@@ -86,12 +90,12 @@ def get_default_options():
 
 
 def main_sim():
-    # for r in run_simulation(get_default_options()):
-        # print(r)
-        # pass
+    for r in run_simulation(get_default_options()):
+        print(r)
+        pass
 
-    import cProfile
-    cProfile.run('for r in run_simulation(get_default_options()):\n\tpass')
+    # import cProfile
+    # cProfile.run('for r in run_simulation(get_default_options()):\n\tpass')
 
 
 if __name__ == "__main__":

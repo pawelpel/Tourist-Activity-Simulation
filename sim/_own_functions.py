@@ -7,7 +7,7 @@ from string import ascii_letters
 from functools import wraps
 
 # 1 print, 0 not print
-MUTE_PRINTING = 1
+MUTE_PRINTING = 0
 
 
 def pri(self, message=''):
@@ -39,7 +39,7 @@ def generate_token():
 
 
 def sort_city_objects_by_popularity(objs):
-    if random.choice(range(0, 3)):
+    if random.choice(range(0, 2)):
         tmp = sorted(objs, key=lambda x: x.popularity, reverse=True)
     else:
         # Have some randomness in choosing obj
@@ -54,12 +54,12 @@ def person_walking(self, s):
 
 
 def check_if_trip_is_over(self, trip_duration):
+    pri(self, "Leaving the town.")
     return self.env.now >= trip_duration
 
 
-def check_time(self, start, end):
-    day = 24*60
-    now = self.env.now
+def check_time_alg(now, start, end):
+    day = 24 * 60
     if now > day:
         now -= (day * (now//day))
     if now <= day:
@@ -70,6 +70,16 @@ def check_time(self, start, end):
         if now >= start >= end:
             return True
     return False
+
+
+def check_time(self, start, end):
+    now = self.env.now
+    return check_time_alg(now, start, end)
+
+
+def check_time_2(env, start, end):
+    now = env.now
+    return check_time_alg(now, start, end)
 
 
 def calculate_distance(from_pos, to_pos):
@@ -91,3 +101,8 @@ def sort_city_objects_by_nearest_pos(objs, from_pos):
         tmp = objs[:]
         random.shuffle(tmp)
     return tmp
+
+
+def convert_time_to_min(time_):
+    h, m = time_.split(':')
+    return time_to_min(h=int(h), mi=int(m))
