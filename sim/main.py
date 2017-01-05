@@ -43,7 +43,7 @@ def run_simulation(options):
         museums         {}
         """.format(hotels_sum_of_capacity, restaurants_sum_of_capacity, museum_sum_of_capacity)
 
-    env.receiver = init_text_to_write_receiver(simplejson.dumps(options) + places_capacity)
+    env.receiver = init_text_to_write_receiver(simplejson.dumps(options, indent=4 * ' ') + places_capacity)
     next(env.receiver)
 
     # Create People using individual configuration
@@ -104,7 +104,7 @@ def get_default_options():
     default_options["map_size_x"] = 2000*590//1000  # px * 590//1000
     default_options["map_size_y"] = 2844*590//1000
     default_options["how_long"] = time_to_min(d=2)  # mi, h, d, y
-    default_options["how_many_people"] = 10000
+    default_options["how_many_people"] = 1000
     default_options["whats_the_weather"] = 'sunny'  # 'sunny', 'windy', 'rainy'
     default_options["when_it_happens"] = 'weekday'  # 'weekday', 'weekend', 'vacation'
     default_options["month"] = 2

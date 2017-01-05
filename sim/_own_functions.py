@@ -8,7 +8,7 @@ from functools import wraps
 
 # 1 print/write to file,     0 no print/no write
 MUTE_PRINTING = 0
-MUTE_WRITING = 0
+MUTE_WRITING = 1
 
 
 def init_text_to_write_receiver(options):
@@ -53,14 +53,15 @@ def generate_token():
 
 
 def sort_city_objects_by_popularity(objs):
-    if random.choice(range(0, 2)):
-        tmp = sorted(objs, key=lambda x: x.popularity, reverse=True)
-    else:
-        # Have some randomness in choosing obj
-        # but still most of them choose by popularity
-        tmp = objs[:]
-        random.shuffle(tmp)
-    return tmp
+    # if random.choice(range(0, 2)):
+    #     tmp = sorted(objs, key=lambda x: x.popularity, reverse=True)
+    # else:
+    #     # Have some randomness in choosing obj
+    #     # but still most of them choose by popularity
+    #     tmp = objs[:]
+    #     random.shuffle(tmp)
+    # return tmp
+    return objs
 
 
 def person_walking(self, s):
@@ -119,3 +120,28 @@ def sort_city_objects_by_nearest_pos(objs, from_pos):
 def convert_time_to_min(time_):
     h, m = time_.split(':')
     return time_to_min(h=int(h), mi=int(m))
+
+
+def get_opened_places(place, env):
+    return [p for p in place if p.is_opened(env)]
+
+
+def get_new_location_based_on_walking_time(current_loc, walking_time, meters_in_min, env):
+    # radius of the circle
+    circle_r = walking_time * meters_in_min
+    if abs(circle_r) > env.map_size_x or abs(circle_r) > env.map_size_y:
+        circle_r = env.map_size_x if env.map_size_x > env.map_size_y else env.map_size_y
+        circle_r *= 2
+    # center of the circle (x, y)
+    circle_x = current_loc[0]
+    circle_y = current_loc[1]
+
+    # random angle
+    alpha = 2 * math.pi * random.random()
+    # random radius
+    r = circle_r * random.random()
+    # calculating coordinates
+    x = r * math.cos(alpha) + circle_x
+    y = r * math.sin(alpha) + circle_y
+    return int(x), int(y)
+

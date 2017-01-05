@@ -35,6 +35,9 @@ class Restaurant(Resource):
         self.open_to = open_to
         self.visit_time = visit_time
 
+    def min_to_close(self, env):
+        return env.now-self.open_to >= self.visit_time
+
     def is_opened(self, env):
         return check_time_2(env, self.open_from, self.open_to)
 
@@ -56,6 +59,9 @@ class Musuem(Resource):
         self.open_from = open_from
         self.open_to = open_to
         self.visit_time = visit_time
+
+    def min_to_close(self, env):
+        return env.now-self.open_to >= self.visit_time
 
     def is_opened(self, env):
         return check_time_2(env, self.open_from, self.open_to)
