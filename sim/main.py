@@ -1,7 +1,8 @@
 #!/usr/bin/env python3.5
 import simpy
+import simplejson
 
-from ._own_functions import time_to_min, time_it
+from ._own_functions import time_to_min, init_text_to_write_receiver
 from .city_config import get_city_config
 from .person_class import Person
 from .person_config import get_person_config
@@ -24,15 +25,36 @@ def run_simulation(options):
     # Which month is it? To set statistics properly.
     env.month = options["month"]
 
-    # Init variables for report
-    hotels_report = {}
-    restaurants_report = {}
-    museums_report = {}
+    # Init sim_agents_log file
+    hotels_sum_of_capacity = restaurants_sum_of_capacity = museum_sum_of_capacity = 0
+
+    for h in city_config["hotels"]:
+        hotels_sum_of_capacity += h.capacity
+    for r in city_config["restaurants"]:
+        restaurants_sum_of_capacity += r.capacity
+    for m in city_config["museums"]:
+        if m.capacity < 9999:
+            museum_sum_of_capacity += m.capacity
+
+    places_capacity = """
+        sum of capacity of:
+        hotels          {}
+        restaurants     {}
+        museums         {}
+        """.format(hotels_sum_of_capacity, restaurants_sum_of_capacity, museum_sum_of_capacity)
+
+    env.receiver = init_text_to_write_receiver(simplejson.dumps(options) + places_capacity)
+    next(env.receiver)
 
     # Create People using individual configuration
     for i in range(options["how_many_people"]):
         person_config = get_person_config(env, i)
         _ = Person(env, city_config, person_config)
+
+    # Init variables for report
+    hotels_report = {}
+    restaurants_report = {}
+    museums_report = {}
 
     # Start Simulation
     last_env_time = None
@@ -45,8 +67,8 @@ def run_simulation(options):
         if last_env_time is not None and env_time != last_env_time:
 
             # Get city's attractions to prepare simulation's state report
-            for k in city_config["hotels"]:
-                hotels_report[k.hotel_name] = k.count
+            for h in city_config["hotels"]:
+                hotels_report[h.hotel_name] = h.count
             for r in city_config["restaurants"]:
                 restaurants_report[r.restaurant_name] = (r.count, int(r.is_opened(env)), int(r.is_crowded()))
             for m in city_config["museums"]:
@@ -81,7 +103,7 @@ def get_default_options():
     default_options = options()
     default_options["map_size_x"] = 2000*590//1000  # px * 590//1000
     default_options["map_size_y"] = 2844*590//1000
-    default_options["how_long"] = time_to_min(d=3)  # mi, h, d, y
+    default_options["how_long"] = time_to_min(d=2)  # mi, h, d, y
     default_options["how_many_people"] = 10000
     default_options["whats_the_weather"] = 'sunny'  # 'sunny', 'windy', 'rainy'
     default_options["when_it_happens"] = 'weekday'  # 'weekday', 'weekend', 'vacation'
@@ -90,12 +112,12 @@ def get_default_options():
 
 
 def main_sim():
-    for r in run_simulation(get_default_options()):
-        print(r)
-        pass
+    # for r in run_simulation(get_default_options()):
+    #     print(r)
+    #     pass
 
-    # import cProfile
-    # cProfile.run('for r in run_simulation(get_default_options()):\n\tpass')
+    import cProfile
+    cProfile.run('for r in run_simulation(get_default_options()):\n\tpass')
 
 
 if __name__ == "__main__":

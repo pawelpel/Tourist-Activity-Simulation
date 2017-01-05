@@ -11,6 +11,9 @@ class Person(object):
         self.env = env
         self.action = self.env.process(self.run())
 
+        # For loging file
+        self.receiver = env.receiver
+
         # # Set person profile
         self.person_config = person_config
         self.name = self.person_config["name"]
@@ -30,9 +33,10 @@ class Person(object):
         self.person_sleeps_for_about_min = time_to_min(h=self.person_sleeps_for_about_h)
         self.person_last_hotel = None
 
-        # eat
-        # self.person_lunch_time_start = None
-        # self.person_lunch_time_end = None
+        # restaurant
+        self.person_meals_per_day = ra.randint(2, 3)
+        self.person_eaten_meals = 0
+
 
         # walking
         self.person_avg_sightseeing_time = time_to_min(h=ra.randint(3, 5))
@@ -44,6 +48,7 @@ class Person(object):
 
         # # Handle the city
         self.hotels = sort_city_objects_by_popularity(city_config["hotels"])
+        self.hotels_number = city_config["hotels_number"]
         self.restaurants = sort_city_objects_by_popularity(city_config["restaurants"])
 
     def run(self):
@@ -57,6 +62,7 @@ class Person(object):
         while True:
             # Is that the end of his trip?
             if check_if_trip_is_over(self, self.person_leaving_time):
+                pri(self, "Leaving the town.")
                 break
 
             # Sleeping time ?
@@ -69,11 +75,12 @@ class Person(object):
 
                     # Was in any hotel before?
                     if self.person_last_hotel:
+
                         # Yes, so that hotel become first try
                         self.hotels.remove(self.person_last_hotel)
                         self.hotels = [self.person_last_hotel, *self.hotels]
-                        pri(self, "Going to the last night hotel!")
 
+                    hotels_checked = 0
                     for hotel in self.hotels:
                         # Found one, so he is going to that hotel
                         how_long_going_to_hotel = calculate_walking_time(self.person_last_position, hotel.position,
@@ -115,12 +122,46 @@ class Person(object):
                         # No there is not any bed for him
                         else:
                             pri(self, "No place to sleep at {}".format(hotel.hotel_name))
+                            hotels_checked += 1
+
+                    # Janusz didn't find any empty hotel
+                    if hotels_checked == self.hotels_number:
+
+                        # So he is leaving Old Town to find one
+                        new_pos = ra.choice((
+                            (0, 0),
+                            (0, self.env.map_size_y),
+                            (self.env.map_size_x, 0),
+                            (self.env.map_size_x, self.env.map_size_y)
+                        ))
+
+                        how_long_going_to_outside_hotel = calculate_walking_time(self.person_last_position, new_pos,
+                                                                                 self.person_avg_meters_in_min)
+                        pri(self, "Going to the hotel outside Old Town")
+                        person_walking(self, 1)
+                        yield self.env.timeout(how_long_going_to_outside_hotel)
+                        person_walking(self, -1)
+
+                        # Janusz is in the hotel outside the Old Town
+                        additional_hours = ra.randint(1, 3)
+                        pri(self, "Being in anonymouse Hotel for {}h".format(self.person_sleeps_for_about_h+
+                                                                             additional_hours))
+                        yield self.env.timeout(self.person_sleeps_for_about_min+
+                                               time_to_min(h=additional_hours))
 
                     # Night is over
                     self.person_nights_at_hotel -= 1
 
-            # Want to eat something ?
-            # if check_time(self, self.person_lunch_time_start, self.person_lunch_time_end):
+            # Is that the end of his trip?
+            if check_if_trip_is_over(self, self.person_leaving_time):
+                pri(self, "Leaving the town.")
+                break
+
+            # # Does he have any meal to eat
+            # if self.person_eaten_meals < self.person_meals_per_day:
+            #
+            #     # Yes, so looking for nearest restaurant
+            #     self.restaurants = sort_city_objects_by_nearest_pos(self.restaurants, self.person_last_position)
 
             # No, its not sleeping time
             pri(self, "Walking")

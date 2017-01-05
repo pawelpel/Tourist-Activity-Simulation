@@ -124,6 +124,7 @@ def get_city_config(env):
     # Make The City!
     city = {
         "hotels": hotels,
+        "hotels_number": len(hotels),
         "restaurants": restaurants,
         "museums": museums,
     }

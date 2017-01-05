@@ -6,13 +6,27 @@ import math
 from string import ascii_letters
 from functools import wraps
 
-# 1 print, 0 not print
+# 1 print/write to file,     0 no print/no write
 MUTE_PRINTING = 0
+MUTE_WRITING = 0
+
+
+def init_text_to_write_receiver(options):
+    with open('sim_agents_log.txt', 'w') as file:
+
+        file.write(options)
+        file.write("\n")
+
+        while 1:
+            item = yield
+            file.write(item)
 
 
 def pri(self, message=''):
     if MUTE_PRINTING:
         print("Time: {} {:<10} {}".format(datetime.timedelta(minutes=self.env.now), self.name, message))
+    if MUTE_WRITING:
+        self.receiver.send("Time: {} {:<10} {} \n".format(datetime.timedelta(minutes=self.env.now), self.name, message))
 
 
 def min_to_date(mi):
@@ -54,7 +68,6 @@ def person_walking(self, s):
 
 
 def check_if_trip_is_over(self, trip_duration):
-    pri(self, "Leaving the town.")
     return self.env.now >= trip_duration
 
 
@@ -93,7 +106,7 @@ def calculate_walking_time(from_pos, to_pos, avg_meters_in_min):
 
 
 def sort_city_objects_by_nearest_pos(objs, from_pos):
-    if random.choice(range(0, 3)):
+    if random.choice(range(0, 2)):
         tmp = sorted(objs, key=lambda x: calculate_distance(from_pos, x.position))
     else:
         # Have some randomness in choosing object
