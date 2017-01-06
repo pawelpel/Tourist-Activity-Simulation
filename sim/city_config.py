@@ -2,7 +2,7 @@
 from simpy import Resource
 import simplejson
 
-from ._own_functions import check_time_2, convert_time_to_min
+from ._own_functions import check_time_2, check_time_3, convert_time_to_min
 
 
 class Hotel(Resource):
@@ -31,15 +31,16 @@ class Restaurant(Resource):
         self.position = position
         self.restaurant_name = name
         self.popularity = popularity
-        # self.popularity = 50
         self.open_from = open_from
         self.open_to = open_to
         self.visit_time = visit_time
 
     def min_to_close(self, env):
-        return (env.now % 1440)-self.open_to <= self.visit_time * 0.8
+        return self.is_opened(env, add=env.now + self.visit_time * 0.5)
 
-    def is_opened(self, env):
+    def is_opened(self, env, add=None):
+        if add:
+            return check_time_3(add, self.open_from, self.open_to)
         return check_time_2(env, self.open_from, self.open_to)
 
     def is_crowded(self):
@@ -62,9 +63,11 @@ class Musuem(Resource):
         self.visit_time = visit_time
 
     def min_to_close(self, env):
-        return (env.now % 1440)-self.open_to <= self.visit_time
+        return self.is_opened(env, add=env.now + self.visit_time * 0.9)
 
-    def is_opened(self, env):
+    def is_opened(self, env, add=None):
+        if add:
+            return check_time_3(add, self.open_from, self.open_to)
         return check_time_2(env, self.open_from, self.open_to)
 
     def is_crowded(self):

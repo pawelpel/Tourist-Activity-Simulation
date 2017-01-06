@@ -3,12 +3,11 @@ import time
 import datetime
 import random
 import math
-from string import ascii_letters
 from functools import wraps
 
 # 1 print/write to file,     0 no print/no write
 MUTE_PRINTING = 0
-MUTE_WRITING = 1
+MUTE_WRITING = 0
 
 
 def init_text_to_write_receiver(options):
@@ -47,21 +46,15 @@ def time_it(fun):
     return wrapp_fun
 
 
-def generate_token():
-    random.seed(time.time())
-    return ''.join(random.choice(ascii_letters) for _ in range(25))
-
-
 def sort_city_objects_by_popularity(objs):
-    # if random.choice(range(0, 2)):
-    #     tmp = sorted(objs, key=lambda x: x.popularity, reverse=True)
-    # else:
-    #     # Have some randomness in choosing obj
-    #     # but still most of them choose by popularity
-    #     tmp = objs[:]
-    #     random.shuffle(tmp)
-    # return tmp
-    return objs
+    if random.choice(range(0, 7)):
+        tmp = sorted(objs, key=lambda x: x.popularity, reverse=True)
+    else:
+        # Have some randomness in choosing obj
+        # but still most of them choose by popularity
+        tmp = objs[:]
+        random.shuffle(tmp)
+    return tmp
 
 
 def person_walking(self, s):
@@ -96,6 +89,10 @@ def check_time_2(env, start, end):
     return check_time_alg(now, start, end)
 
 
+def check_time_3(now, start, end):
+    return check_time_alg(now, start, end)
+
+
 def calculate_distance(from_pos, to_pos):
     return math.sqrt((to_pos[0]-from_pos[0])**2 + (to_pos[1]-from_pos[1])**2)
 
@@ -107,7 +104,7 @@ def calculate_walking_time(from_pos, to_pos, avg_meters_in_min):
 
 
 def sort_city_objects_by_nearest_pos(objs, from_pos):
-    if random.choice(range(0, 2)):
+    if random.choice(range(0, 6)):
         tmp = sorted(objs, key=lambda x: calculate_distance(from_pos, x.position))
     else:
         # Have some randomness in choosing object

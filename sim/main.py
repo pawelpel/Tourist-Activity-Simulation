@@ -1,11 +1,24 @@
 #!/usr/bin/env python3.5
 import simpy
 import simplejson
+import random
 
 from ._own_functions import time_to_min, init_text_to_write_receiver
 from .city_config import get_city_config
 from .person_class import Person
 from .person_config import get_person_config
+
+
+def set_interuptions(env, options, person, when):
+    # Rain ?
+    if options["whats_the_weather"] == 'rainy':
+        yield env.timeout(when)
+        env.is_raining = True
+        try:
+            if person.is_sightseeing:
+                person.action.interrupt()
+        except RuntimeError:
+            pass
 
 
 # @time_it # <- dont use when fun is yielding
@@ -46,10 +59,13 @@ def run_simulation(options):
     env.receiver = init_text_to_write_receiver(simplejson.dumps(options, indent=4 * ' ') + places_capacity)
     next(env.receiver)
 
+    rain_at = random.randint(0, options["how_long"])
+    env.is_raining = False
     # Create People using individual configuration
     for i in range(options["how_many_people"]):
         person_config = get_person_config(env, i)
-        _ = Person(env, city_config, person_config)
+        person = Person(env, city_config, person_config)
+        env.process(set_interuptions(env, options, person, rain_at))
 
     # Init variables for report
     hotels_report = {}
@@ -70,17 +86,18 @@ def run_simulation(options):
             for h in city_config["hotels"]:
                 hotels_report[h.hotel_name] = h.count
             for r in city_config["restaurants"]:
-                restaurants_report[r.restaurant_name] = (r.count, int(r.is_opened(env)), int(r.is_crowded()))
+                restaurants_report[r.restaurant_name] = (r.count, int(r.is_opened(env)), int(r.popularity))
             for m in city_config["museums"]:
-                museums_report[m.museum_name] = (m.count, int(m.is_opened(env)), int(m.is_crowded()))
+                museums_report[m.museum_name] = (m.count, int(m.is_opened(env)), int(m.popularity))
 
             # Creating simulations state report
             report = {
-                "TIM": env_time,
-                "WP": env.walking_people,
-                "HR": hotels_report,
+                "T": env_time,
+                "W": env.walking_people,
+                "R": env.is_raining,
+                "H": hotels_report,
                 "RR": restaurants_report,
-                "MR": museums_report
+                "M": museums_report
             }
 
             # Sending/Printing/Whatever connected with report
@@ -103,9 +120,9 @@ def get_default_options():
     default_options = dict_options()
     default_options["map_size_x"] = 2000*590//1000  # px * 590//1000
     default_options["map_size_y"] = 2844*590//1000
-    default_options["how_long"] = time_to_min(d=2)  # mi, h, d, y
-    default_options["how_many_people"] = 1000
-    default_options["whats_the_weather"] = 'sunny'  # 'sunny', 'windy', 'rainy'
+    default_options["how_long"] = time_to_min(d=3)  # mi, h, d, y
+    default_options["how_many_people"] = 5000
+    default_options["whats_the_weather"] = 'rainy'  # 'sunny', 'rainy'
     default_options["when_it_happens"] = 'weekday'  # 'weekday', 'weekend', 'vacation'
     default_options["month"] = 2
     return default_options

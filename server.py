@@ -7,6 +7,7 @@ import simplejson
 # from sim import main_sim
 from sim import run_simulation
 from sim import get_default_options
+from sim import main_sim
 
 
 class BaseHandler(tornado.web.RequestHandler):
