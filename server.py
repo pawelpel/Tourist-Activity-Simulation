@@ -1,13 +1,18 @@
+#!/usr/bin/env python3.5
 import tornado.web
 import tornado.escape
 from tornado.ioloop import IOLoop
 import simplejson
 
-from sim.main import run_simulation, main_sim
-from sim.main import get_default_options, options
+# from sim import main_sim
+from sim import run_simulation
+from sim import get_default_options
 
 
 class BaseHandler(tornado.web.RequestHandler):
+    def data_received(self, chunk):
+        pass
+
     def __init__(self, *a, **kw):
         super().__init__(*a, **kw)
 
@@ -49,7 +54,7 @@ def main():
 if __name__ == '__main__':
 
     # To run server
-    # main()
+    main()
 
     # To run simulation
-    main_sim()
+    # main_sim()

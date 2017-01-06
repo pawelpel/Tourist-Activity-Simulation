@@ -27,20 +27,23 @@ class Person(object):
         self.person_goes_to_sleep_at_h = ra.randint(21, 24)
         self.person_goes_to_sleep_at_min = time_to_min(h=self.person_goes_to_sleep_at_h)
         self.person_cant_go_to_sleep_at_min = time_to_min(h=(24 - self.person_goes_to_sleep_at_h + ra.randint(1, 4)))
-
         self.person_nights_at_hotel = self.person_trip_duration // time_to_min(d=1)
-        self.person_sleeps_for_about_h = ra.randint(6, 8)
+        self.person_sleeps_for_about_h = ra.randint(6, 10)
         self.person_sleeps_for_about_min = time_to_min(h=self.person_sleeps_for_about_h)
         self.person_last_hotel = None
+        self.person_add_hours_for_outside_hotel = ra.randint(1, 3)
+        self.person_max_number_of_tries_for_hotel = ra.randint(2, 5)
 
         # restaurant
         self.person_meals_per_day = ra.randint(2, 3)
         self.person_eaten_meals = 0
+        self.person_max_number_of_tries_for_restaurant = ra.randint(2, 5)
 
         # museum
         self.list_of_museums = ra.sample(city_config["museums"], len(city_config["museums"])//ra.randint(1, 4))
         self.list_of_museums = sort_city_objects_by_popularity(self.list_of_museums)
         self.person_want_to_visit_museum = ra.randint(0, 8)
+        self.person_max_number_of_tries_for_museum = ra.randint(2, 5)
 
         # sightseeing
         self.person_start_sightseeing = time_to_min(h=ra.randint(6, 10))
@@ -54,7 +57,6 @@ class Person(object):
 
         # # Handle the city
         self.hotels = sort_city_objects_by_popularity(city_config["hotels"])
-        self.hotels_number = city_config["hotels_number"]
         self.restaurants = sort_city_objects_by_popularity(city_config["restaurants"])
 
     def run(self):
@@ -66,15 +68,12 @@ class Person(object):
         pri(self, "Arrived")
 
         while True:
-            # Is that the end of his trip?
-            if check_if_trip_is_over(self, self.person_leaving_time):
-                pri(self, "Leaving the town.")
-                break
 
-            # Sleeping time ?
-            if check_time(self, self.person_goes_to_sleep_at_min, self.person_cant_go_to_sleep_at_min):
-                # Have need to sleep that night at hotel?
-                if self.person_nights_at_hotel > 0:
+            # Have need to sleep this night at the hotel?
+            if self.person_nights_at_hotel > 0:
+
+                # Is that sleeping time
+                if check_time(self, self.person_goes_to_sleep_at_min, self.person_cant_go_to_sleep_at_min):
 
                     # Yes, so he is looking for a hotel
                     self.hotels = sort_city_objects_by_nearest_pos(self.hotels, self.person_last_position)
@@ -82,13 +81,15 @@ class Person(object):
                     # Was in any hotel before?
                     if self.person_last_hotel:
 
-                        # Yes, so that hotel become first try
+                        # Yes, so that hotel become his first try
                         self.hotels.remove(self.person_last_hotel)
                         self.hotels = [self.person_last_hotel, *self.hotels]
 
+                    # Let's check hotels
                     hotels_checked = 0
                     for hotel in self.hotels:
-                        # Found one, so he is going to that hotel
+
+                        # Going to the hotel, and it takes him some time
                         how_long_going_to_hotel = calculate_walking_time(self.person_last_position,
                                                                          hotel.position,
                                                                          self.person_avg_meters_in_min)
@@ -100,7 +101,7 @@ class Person(object):
                         yield self.env.timeout(how_long_going_to_hotel)
                         person_walking(self, -1)
 
-                        # Update position
+                        # Update his position
                         self.person_last_position = hotel.position
 
                         # Is there place for him to sleep there?
@@ -132,9 +133,9 @@ class Person(object):
                             hotels_checked += 1
 
                     # Janusz didn't find any empty hotel
-                    if hotels_checked == self.hotels_number:
+                    if hotels_checked >= self.person_max_number_of_tries_for_hotel:
 
-                        # So he is leaving Old Town to find one
+                        # So he is leaving the Old Town to find hotel
                         new_pos = ra.choice((
                             (0, 0),
                             (0, self.env.map_size_y),
@@ -142,6 +143,7 @@ class Person(object):
                             (self.env.map_size_x, self.env.map_size_y)
                         ))
 
+                        # And it will take him some time to get there
                         how_long_going_to_outside_hotel = calculate_walking_time(self.person_last_position, new_pos,
                                                                                  self.person_avg_meters_in_min)
                         pri(self, "Going to the hotel outside Old Town")
@@ -150,10 +152,10 @@ class Person(object):
                         person_walking(self, -1)
 
                         # Janusz is in the hotel outside the Old Town
-                        additional_hours = ra.randint(1, 3)
-                        pri(self, "Being in anonymous hotel for {}h".format(self.person_sleeps_for_about_h+
-                                                                             additional_hours))
-                        yield self.env.timeout(self.person_sleeps_for_about_min+
+                        additional_hours = self.person_add_hours_for_outside_hotel
+                        pri(self, "Being in anonymous hotel for {}h".format(self.person_sleeps_for_about_h +
+                                                                            additional_hours))
+                        yield self.env.timeout(self.person_sleeps_for_about_min +
                                                time_to_min(h=additional_hours))
 
                     # Night is over
@@ -167,13 +169,12 @@ class Person(object):
             # Does he have any meal to eat ?
             if self.person_eaten_meals < self.person_meals_per_day:
 
-                # Yes, so looking for nearest restaurant
-                self.restaurants = sort_city_objects_by_nearest_pos(self.restaurants, self.person_last_position)
-
+                # Yes, so he is looking for nearest opened restaurant
+                checked_restaurants = 0
                 for restaurant in sort_city_objects_by_nearest_pos(get_opened_places(self.restaurants, self.env),
                                                                    self.person_last_position):
 
-                    # Found one, so he is going to that restaurnat
+                    # Found one, so he is going to that restaurant, it takes him some time
                     how_long_going_to_restaurant = calculate_walking_time(self.person_last_position,
                                                                           restaurant.position,
                                                                           self.person_avg_meters_in_min)
@@ -192,19 +193,36 @@ class Person(object):
                     # Update position
                     self.person_last_position = restaurant.position
 
-                    # Is there place for him to eat there?
-                    if not restaurant.is_crowded() and restaurant.min_to_close(self.env):
+                    # Is there place for him to eat there and is that restaurant still opened?
+                    if not restaurant.is_crowded() and restaurant.min_to_close(self.env)\
+                            and restaurant.is_opened(self.env):
 
+                        # There is a chair for him so he is going to eat there
                         with restaurant.request() as req:
-                            # There is a chair for him
+
+                            # Eating takes him some time
                             new_visit_time = ra.randint(restaurant.visit_time//2, restaurant.visit_time)
 
                             pri(self, "Eating time at: {} for next {}min".format(restaurant.restaurant_name,
                                                                                  new_visit_time))
                             yield req
                             yield self.env.timeout(new_visit_time)
-                            self.person_eaten_meals += 1
 
+                            # Meal eaten
+                            self.person_eaten_meals += 1
+                            break
+                    else:
+                        # Restaurant is closed or will be in short time? Maybe crowded? Check next restaurant!
+                        pri(self, "Looking for different restaurant, C:{} CL:{} T:{} P:{}".format(
+                            restaurant.is_crowded(),
+                            restaurant.is_opened(self.env),
+                            restaurant.min_to_close(self.env),
+                            restaurant.count
+                        ))
+                        checked_restaurants += 1
+
+                        # Give up on looking for restaurant
+                        if checked_restaurants > self.person_max_number_of_tries_for_restaurant:
                             break
 
             # Is that the end of his trip?
@@ -213,6 +231,7 @@ class Person(object):
                 break
 
             # Sightseeing ?
+            pri(self, "Sightseeing")
             person_walking(self, 1)
             yield self.env.timeout(self.person_avg_sightseeing_time)
             self.person_last_position = get_new_location_based_on_walking_time(self.person_last_position,
@@ -221,14 +240,15 @@ class Person(object):
                                                                                self.env)
             person_walking(self, -1)
 
-
             # Visiting museums ?
             if self.person_want_to_visit_museum:
 
-                # Looking for opened museum
-                for museum in get_opened_places(self.list_of_museums, self.env):
+                # Looking for nearest opened museum
+                checked_museums = 0
+                for museum in sort_city_objects_by_nearest_pos(get_opened_places(self.list_of_museums, self.env),
+                                                               self.person_last_position):
 
-                    # Found one, so he is going to that museum
+                    # Found one, so he is going to that museum and it takes him some time
                     how_long_going_to_museum = calculate_walking_time(self.person_last_position,
                                                                       museum.position,
                                                                       self.person_avg_meters_in_min)
@@ -245,21 +265,41 @@ class Person(object):
                     yield self.env.timeout(how_long_going_to_museum)
                     person_walking(self, -1)
 
-                    # Update position
+                    # Update his position
                     self.person_last_position = museum.position
 
-                    # Is there place for him to visit?
-                    if not museum.is_crowded() and museum.min_to_close(self.env):
+                    # Is opened? Is not crowded? Can he visit it?
+                    if not museum.is_crowded() and museum.min_to_close(self.env) and museum.is_opened(self.env):
+
+                        # Yes, it is!
                         with museum.request() as req:
+
+                            # Visiting takes him some time
                             new_visit_time = ra.randint(museum.visit_time//2, museum.visit_time)
-                            # There is a space for him
+
                             pri(self, "Visiting: {} for next {}min".format(museum.museum_name,
                                                                            new_visit_time))
                             yield req
                             yield self.env.timeout(new_visit_time)
 
+                            # Remove that museum from list! He doesn't want to see it again.
                             self.list_of_museums.remove(museum)
                             break
+                    else:
+                        # Museum is closed or will be in short time? Maybe crowded? Check next museum!
+                        pri(self, "Looking for different museum, C:{} CL:{} T:{} P:{}".format(
+                            not museum.is_crowded(),
+                            museum.is_opened(self.env),
+                            museum.min_to_close(self.env),
+                            museum.count
+                        ))
+                        checked_museums += 1
 
-# TODO PRINTOWANIE OPUSZCZANIA RESTAURACJI I LOKALI, CZY DZIALA NA PEWNO SORTOWANIE OTWRTYCH?
-# TODO SPOJRZEC NA LOGI AGENTOW
+                        # Give up on looking for museum
+                        if checked_museums > self.person_max_number_of_tries_for_museum:
+                            break
+
+            # Is that the end of his trip?
+            if check_if_trip_is_over(self, self.person_leaving_time):
+                pri(self, "Leaving the town.")
+                break

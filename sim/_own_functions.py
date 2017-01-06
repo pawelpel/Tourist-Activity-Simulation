@@ -144,4 +144,3 @@ def get_new_location_based_on_walking_time(current_loc, walking_time, meters_in_
     x = r * math.cos(alpha) + circle_x
     y = r * math.sin(alpha) + circle_y
     return int(x), int(y)
-

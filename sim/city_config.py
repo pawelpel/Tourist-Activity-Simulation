@@ -31,12 +31,13 @@ class Restaurant(Resource):
         self.position = position
         self.restaurant_name = name
         self.popularity = popularity
+        # self.popularity = 50
         self.open_from = open_from
         self.open_to = open_to
         self.visit_time = visit_time
 
     def min_to_close(self, env):
-        return env.now-self.open_to >= self.visit_time
+        return (env.now % 1440)-self.open_to <= self.visit_time * 0.8
 
     def is_opened(self, env):
         return check_time_2(env, self.open_from, self.open_to)
@@ -61,7 +62,7 @@ class Musuem(Resource):
         self.visit_time = visit_time
 
     def min_to_close(self, env):
-        return env.now-self.open_to >= self.visit_time
+        return (env.now % 1440)-self.open_to <= self.visit_time
 
     def is_opened(self, env):
         return check_time_2(env, self.open_from, self.open_to)
@@ -88,7 +89,6 @@ def get_city_config(env):
 
     # Create Hotels (name, list of beds in rooms, stars, popularity in %)
     try:
-        # todo change path to be more elastic
         file = open('city_config.json', 'rb')
         print('City config has been read!')
         city_from_file = simplejson.load(file)

@@ -89,7 +89,7 @@ def run_simulation(options):
         last_env_time = env_time
 
 
-def options():
+def dict_options():
     return {'map_size_x': None,
             'map_size_y': None,
             'how_long': None,
@@ -100,7 +100,7 @@ def options():
 
 
 def get_default_options():
-    default_options = options()
+    default_options = dict_options()
     default_options["map_size_x"] = 2000*590//1000  # px * 590//1000
     default_options["map_size_y"] = 2844*590//1000
     default_options["how_long"] = time_to_min(d=2)  # mi, h, d, y
