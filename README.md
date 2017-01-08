@@ -28,9 +28,9 @@ Tourist Activity Simulation BackEnd - Projekt na Modelowanie i Symulacja System√
 `git clone <link to repo>`
 
 #### Install requirements
-`pip3 install simpy`
-`pip3 install tornado`
-`pip3 install simplejson`
+```pip3 install simpy
+pip3 install tornado
+pip3 install simplejson```
 
 #### Run server
 `python3 server.py`
