@@ -12,7 +12,7 @@ Tourist Activity Simulation BackEnd - Projekt na Modelowanie i Symulacja System√
 #### Install virtualenv
 `python3 -m pip install virtualenv`
 
-#### Create seperated folder
+#### Create separated folder
 `mkdir your_folder`
 
 #### Enter created folder
