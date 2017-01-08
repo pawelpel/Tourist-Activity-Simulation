@@ -13,7 +13,7 @@ Tourist Activity Simulation BackEnd - Projekt na Modelowanie i Symulacja System√
 
 
 #### Install virtualenv
-`python3 -m pip install virtualenv`
+`python -m pip install virtualenv`
 
 
 
@@ -44,11 +44,11 @@ Tourist Activity Simulation BackEnd - Projekt na Modelowanie i Symulacja System√
 
 #### Install requirements
 ```
-pip3 install simpy
-pip3 install tornado
-pip3 install simplejson
+pip install simpy
+pip install tornado
+pip install simplejson
 ```
 
 
 #### Run server
-`python3 server.py`
+`python server.py`
