@@ -37,7 +37,7 @@ Tourist Activity Simulation BackEnd - Projekt na Modelowanie i Symulacja System√
 
 
 
-#### Download or clone this repositry
+#### Download or clone this repository
 `git clone <link to repo>`
 
 
