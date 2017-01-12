@@ -9,16 +9,18 @@ from .person_class import Person
 from .person_config import get_person_config
 
 
-def set_interuptions(env, options, person, when):
+def set_interuptions(env, options, person, when_starts, when_stops):
     # Rain ?
     if options["whats_the_weather"] == 'rainy':
-        yield env.timeout(when)
+        yield env.timeout(when_starts)
         env.is_raining = True
         try:
             if person.is_sightseeing:
                 person.action.interrupt()
         except RuntimeError:
             pass
+        yield env.timeout(when_starts - when_stops)
+        env.is_raining = False
 
 
 # @time_it # <- dont use when fun is yielding
@@ -59,13 +61,15 @@ def run_simulation(options):
     env.receiver = init_text_to_write_receiver(simplejson.dumps(options, indent=4 * ' ') + places_capacity)
     next(env.receiver)
 
-    rain_at = random.randint(0, options["how_long"])
+    min_rain = 30
+    rain_at = random.randint(0, options["how_long"]-min_rain)
+    rain_to = random.randint(rain_at+min_rain, options["how_long"])
     env.is_raining = False
     # Create People using individual configuration
     for i in range(options["how_many_people"]):
         person_config = get_person_config(env, i)
         person = Person(env, city_config, person_config)
-        env.process(set_interuptions(env, options, person, rain_at))
+        env.process(set_interuptions(env, options, person, rain_at, rain_to))
 
     # Init variables for report
     hotels_report = {}

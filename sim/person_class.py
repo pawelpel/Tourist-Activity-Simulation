@@ -56,7 +56,6 @@ class Person(object):
         # global actions
         self.person_avg_organization_time = time_to_min(mi=ra.randint(5, 25))
         self.person_last_pos = self.person_config["first_position"]
-        self.rain = False
         self.person_buying_umbrella_time = time_to_min(mi=ra.randint(2, 25))
         self.is_sightseeing = False
 
@@ -298,7 +297,7 @@ class Person(object):
 
             # Sightseeing ?
             # Is it sunny? Or has Janusz an umbrella?
-            if not self.rain or self.person_has_umbrella:
+            if not self.env.is_raining or self.person_has_umbrella:
                 sightseeing_start_time = self.env.now
                 person_walking(self, 1)
                 pri(self, "Sightseeing")
@@ -308,7 +307,6 @@ class Person(object):
 
                 # Started to rain?
                 except simpy.Interrupt:
-                    self.rain = True
 
                     # If Janusz has an umbrella he can continue sightseeing
                     if self.person_has_umbrella:
@@ -344,5 +342,3 @@ class Person(object):
                                                                       self.person_avg_meters_in_min,
                                                                       self.env)
         self.is_sightseeing = False
-
-# TODO TWEAK POPULARITY ?
