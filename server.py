@@ -3,6 +3,7 @@ import tornado.web
 import tornado.escape
 from tornado.ioloop import IOLoop
 import simplejson
+import copy
 
 # from sim import main_sim
 from sim import run_simulation
@@ -40,28 +41,11 @@ class MainHandler(BaseHandler):
         # Iter over all simulation and send all
         runner = run_simulation(self.get_user_options())
 
-        # # Working version
-        raport = []
+        report = []
         for i, r in enumerate(runner):
-            new = [i, str(r)]
-            raport.append(new)
+            report.append([i, copy.deepcopy(r)])
 
-        message = simplejson.dumps(raport, indent=2*' ')
-        for i in [('\"', ''), ('(', '['), (')', ']'), ("\'", '\"'), ('False', 'false'), ('True', 'true')]:
-            message = message.replace(*i)
-
-        self.write(message)
-
-        # # Don't know what happen ... Strange thing, to solve
-        # raport = []
-        # for i, r in enumerate(runner):
-        #     new = [i, r["H"]]
-        #     print('FOR: ', new)
-        #     raport.append(new)
-        #
-        # for r in raport:
-        #     print('NIE FOR', r)
-        # self.write(simplejson.dumps(raport, indent=2 * ' '))
+        self.write(simplejson.dumps(report, separators=(',', ':')))
 
 
 class Application(tornado.web.Application):
