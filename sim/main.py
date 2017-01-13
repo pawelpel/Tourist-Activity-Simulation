@@ -3,7 +3,7 @@ import simpy
 import simplejson
 import random
 
-from ._own_functions import time_to_min, init_text_to_write_receiver
+from ._own_functions import time_to_min, init_text_to_write_receiver, min_to_date
 from .city_config import get_city_config
 from .person_class import Person
 from .person_config import get_person_config
@@ -19,7 +19,7 @@ def set_interuptions(env, options, person, when_starts, when_stops):
                 person.action.interrupt()
         except RuntimeError:
             pass
-        yield env.timeout(when_starts - when_stops)
+        yield env.timeout(when_stops - when_starts)
         env.is_raining = False
 
 
@@ -36,6 +36,12 @@ def run_simulation(options):
 
     # How many people are currently walking
     env.walking_people = 0
+
+    # How many people are currently in the hotel outside the area
+    env.at_outside_hotel = 0
+
+    # How many people are currently in the hotel outside the area
+    env.walked_meters = 0
 
     # Which month is it? To set statistics properly.
     env.month = options["month"]
@@ -83,25 +89,32 @@ def run_simulation(options):
         env.step()
         env_time = env.now
 
+        if last_env_time is None:
+            last_env_time = env_time
+
         # Check if something new has happend
-        if last_env_time is not None and env_time != last_env_time:
+        delay = 5
+        if env_time % delay == 0 and last_env_time != env_time:
 
             # Get city's attractions to prepare simulation's state report
             for h in city_config["hotels"]:
                 hotels_report[h.hotel_name] = h.count
             for r in city_config["restaurants"]:
-                restaurants_report[r.restaurant_name] = (r.count, int(r.is_opened(env)), int(r.popularity))
+                restaurants_report[r.restaurant_name] = (r.count, int(r.is_opened(env)))
             for m in city_config["museums"]:
-                museums_report[m.museum_name] = (m.count, int(m.is_opened(env)), int(m.popularity))
+                museums_report[m.museum_name] = (m.count, int(m.is_opened(env)))
 
             # Creating simulations state report
             report = {
+                "TT": str(min_to_date(env_time)),
                 "T": env_time,
                 "W": env.walking_people,
                 "R": env.is_raining,
                 "H": hotels_report,
+                "OH": env.at_outside_hotel,
                 "RR": restaurants_report,
-                "M": museums_report
+                "M": museums_report,
+                "ME": int(env.walked_meters),
             }
 
             # Sending/Printing/Whatever connected with report

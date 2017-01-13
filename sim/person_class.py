@@ -12,56 +12,58 @@ class Person(object):
         self.env = env
         self.action = self.env.process(self.run())
 
-        # For loging file
+        # For logging file
         self.receiver = env.receiver
 
-        # # Set person profile
+        # # Set person basic information
         self.person_config = person_config
         self.name = self.person_config["name"]
 
-        # trip
+        # Trip
         self.person_arriving_time = self.person_config["arriving_time"]
         self.person_trip_duration = self.person_config["trip_duration"]
         self.person_leaving_time = self.person_arriving_time + self.person_trip_duration
 
-        # hotel
-        self.person_goes_to_sleep_at_h = ra.randint(21, 24)
-        self.person_goes_to_sleep_at_min = time_to_min(h=self.person_goes_to_sleep_at_h, mi=ra.randint(0, 30))
-        self.person_cant_go_to_sleep_at_min = time_to_min(h=(24 - self.person_goes_to_sleep_at_h + ra.randint(1, 4)))
-        self.person_nights_at_hotel = self.person_trip_duration // time_to_min(d=1)
-        self.person_sleeps_for_about_h = ra.randint(6, 10)
-        self.person_sleeps_for_about_min = time_to_min(h=self.person_sleeps_for_about_h, mi=ra.randint(0, 30))
-        self.person_last_hotel = None
-        self.person_add_hours_for_outside_hotel = ra.randint(1, 3)
-        self.person_max_number_of_tries_for_hotel = ra.randint(2, 5)
+        # Hotel
+        self.hotels = sort_city_objects_by_popularity(city_config["hotels"])
 
-        # restaurant
+        self.person_goes_to_sleep_at_h = ra.randint(20, 24)
+        self.person_goes_to_sleep_at_min = time_to_min(h=self.person_goes_to_sleep_at_h, mi=ra.randint(0, 30))
+        self.person_cant_go_to_sleep_at_min = time_to_min(h=(24 - self.person_goes_to_sleep_at_h + ra.randint(1, 5)))
+        self.person_sleeps_for_about_h = ra.randint(6, 9)
+        self.person_sleeps_for_about_min = time_to_min(h=self.person_sleeps_for_about_h, mi=ra.randint(0, 30))
+        self.person_nights_at_hotel = self.person_trip_duration // time_to_min(d=1)
+        self.person_add_hours_for_outside_hotel = ra.randint(1, 3)
+        self.person_max_number_of_tries_for_hotel = ra.randint(4, 8)
+        self.person_last_hotel = None
+
+        # Restaurant
+        self.restaurants = sort_city_objects_by_popularity(city_config["restaurants"])
+
         self.person_meals_per_day = ra.randint(2, 4)
         self.person_eaten_meals = 0
-        self.person_max_number_of_tries_for_restaurant = ra.randint(3, 6)
+        self.person_max_number_of_tries_for_restaurant = ra.randint(5, 10)
 
-        # museum
+        # Museum
         self.list_of_museums = ra.sample(city_config["museums"], len(city_config["museums"])//ra.randint(1, 4))
         self.list_of_museums = sort_city_objects_by_popularity(self.list_of_museums)
+
         self.person_want_to_visit_museum = ra.randint(0, 8)
         self.person_max_number_of_tries_for_museum = ra.randint(2, 5)
 
-        # sightseeing
+        # Sightseeing
         self.person_has_umbrella = ra.randint(0, 5)
         self.person_start_sightseeing = time_to_min(h=ra.randint(6, 10), mi=ra.randint(0, 59))
         self.person_stop_sightseeing = time_to_min(h=ra.randint(15, 18), mi=ra.randint(0, 59))
         self.person_avg_sightseeing_time = time_to_min(h=ra.randint(3, 5), mi=ra.randint(0, 59))
         self.person_avg_meters_in_min = ra.randint(3, 6)*1000//60
+        self.person_walking_divider = ra.randint(5, 35)
 
-        # global actions
+        # Global actions
         self.person_avg_organization_time = time_to_min(mi=ra.randint(5, 25))
         self.person_last_pos = self.person_config["first_position"]
         self.person_buying_umbrella_time = time_to_min(mi=ra.randint(2, 25))
         self.is_sightseeing = False
-
-        # # Handle the city
-        self.hotels = sort_city_objects_by_popularity(city_config["hotels"])
-        self.restaurants = sort_city_objects_by_popularity(city_config["restaurants"])
 
     def run(self):
         """
@@ -96,7 +98,8 @@ class Person(object):
                         # Going to the hotel, and it takes him some time
                         how_long_going_to_hotel = calculate_walking_time(self.person_last_pos,
                                                                          hotel.position,
-                                                                         self.person_avg_meters_in_min)
+                                                                         self.person_avg_meters_in_min,
+                                                                         self.env)
                         pri(self, "Going to hotel: {}, f{}, t{}, in time: {}".format(hotel.hotel_name,
                                                                                      self.person_last_pos,
                                                                                      hotel.position,
@@ -136,34 +139,39 @@ class Person(object):
                             pri(self, "No place to sleep at {}".format(hotel.hotel_name))
                             hotels_checked += 1
 
-                    # Janusz didn't find any empty hotel
-                    if hotels_checked >= self.person_max_number_of_tries_for_hotel:
+                        # Janusz didn't find any empty hotel
+                        if hotels_checked >= self.person_max_number_of_tries_for_hotel:
 
-                        # So he is leaving the Old Town to find hotel
-                        new_pos = ra.choice((
-                            (0, ra.randint(0, self.env.map_size_y)),
-                            (ra.randint(0, self.env.map_size_x), 0),
-                            (self.env.map_size_x, ra.randint(0, self.env.map_size_y)),
-                            (ra.randint(0, self.env.map_size_x), self.env.map_size_y)
-                        ))
+                            person_outside(self, 1)
+                            # So he is leaving the Old Town to find hotel
+                            new_pos = ra.choice((
+                                (0, ra.randint(0, self.env.map_size_y)),
+                                (ra.randint(0, self.env.map_size_x), 0),
+                                (self.env.map_size_x, ra.randint(0, self.env.map_size_y)),
+                                (ra.randint(0, self.env.map_size_x), self.env.map_size_y)
+                            ))
 
-                        # And it will take him some time to get there
-                        how_long_going_to_outside_hotel = calculate_walking_time(self.person_last_pos, new_pos,
-                                                                                 self.person_avg_meters_in_min)
-                        pri(self, "Going to the hotel outside Old Town")
-                        person_walking(self, 1)
-                        yield self.env.timeout(how_long_going_to_outside_hotel)
-                        person_walking(self, -1)
+                            # And it will take him some time to get there
+                            how_long_going_to_outside_hotel = calculate_walking_time(self.person_last_pos, new_pos,
+                                                                                     self.person_avg_meters_in_min,
+                                                                                     self.env)
+                            pri(self, "Going to the hotel outside Old Town")
+                            person_walking(self, 1)
+                            yield self.env.timeout(how_long_going_to_outside_hotel)
+                            person_walking(self, -1)
 
-                        # Janusz is in the hotel outside the Old Town
-                        additional_hours = self.person_add_hours_for_outside_hotel
-                        pri(self, "Being in anonymous hotel for {}h".format(self.person_sleeps_for_about_h +
-                                                                            additional_hours))
-                        yield self.env.timeout(self.person_sleeps_for_about_min +
-                                               time_to_min(h=additional_hours))
+                            # Janusz is in the hotel outside the Old Town
+                            additional_hours = self.person_add_hours_for_outside_hotel
+                            pri(self, "Being in anonymous hotel for {}h".format(self.person_sleeps_for_about_h +
+                                                                                additional_hours))
+                            yield self.env.timeout(self.person_sleeps_for_about_min +
+                                                   time_to_min(h=additional_hours))
+                            person_outside(self, -1)
+                            break
 
                     # Night is over
                     self.person_nights_at_hotel -= 1
+                    self.person_eaten_meals = 0
 
             # Is that the end of his trip?
             if check_if_trip_is_over(self, self.person_leaving_time):
@@ -183,13 +191,15 @@ class Person(object):
                     # Found one, so he is going to that restaurant, it takes him some time
                     how_long_going_to_restaurant = calculate_walking_time(self.person_last_pos,
                                                                           restaurant.position,
-                                                                          self.person_avg_meters_in_min)
+                                                                          self.person_avg_meters_in_min,
+                                                                          self.env)
                     pri(self, "Going to restaurant: {}, f{} to{}, distance {}m, in time: {}".format(
                         restaurant.restaurant_name,
                         self.person_last_pos,
                         restaurant.position,
                         int(calculate_distance(self.person_last_pos,
-                                               restaurant.position)),
+                                               restaurant.position,
+                                               self.env)),
                         how_long_going_to_restaurant))
 
                     person_walking(self, 1)
@@ -241,20 +251,23 @@ class Person(object):
 
                 for museum in tmp_museums:
 
-                    if museum.count > 9999 and self.rain and not self.person_has_umbrella:
+                    # Is that open space and doesn't have an umbrella and it's raining?
+                    if museum.capacity > 9999 and self.env.is_raining and not self.person_has_umbrella:
                         continue
 
                     # Found one, so he is going to that museum and it takes him some time
                     how_long_going_to_museum = calculate_walking_time(self.person_last_pos,
                                                                       museum.position,
-                                                                      self.person_avg_meters_in_min)
+                                                                      self.person_avg_meters_in_min,
+                                                                      self.env)
 
                     pri(self, "Going to museum: {}, f{} t{}, distance {}m, in time: {}".format(
                         museum.museum_name,
                         self.person_last_pos,
                         museum.position,
                         int(calculate_distance(self.person_last_pos,
-                                               museum.position)),
+                                               museum.position,
+                                               self.env)),
                         how_long_going_to_museum))
 
                     person_walking(self, 1)
@@ -341,4 +354,6 @@ class Person(object):
                                                                       how_long,
                                                                       self.person_avg_meters_in_min,
                                                                       self.env)
+
+        self.env.walked_meters += how_long*self.person_avg_meters_in_min/self.person_walking_divider
         self.is_sightseeing = False

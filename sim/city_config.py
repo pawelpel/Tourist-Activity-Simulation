@@ -92,7 +92,7 @@ def get_city_config(env):
 
     # Create Hotels (name, list of beds in rooms, stars, popularity in %)
     try:
-        file = open('city_config.json', 'rb')
+        file = open('config/city_config.json', 'rb')
         print('City config has been read!')
         city_from_file = simplejson.load(file)
 

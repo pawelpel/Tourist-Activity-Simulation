@@ -23,19 +23,45 @@ class BaseHandler(tornado.web.RequestHandler):
     def get_user_options(self):
         # Returns dict with default options updated by user options
         ret_options = get_default_options()
+
+        print("Chosen options for simulation: ")
         for k, v in ret_options.items():
             o = self.get_argument(k, default=None)
             if o is not None:
                 ret_options[k] = int(o) if o.isdigit() else o
+            print("{:25} : {}".format(k, ret_options[k]))
         return ret_options
 
 
 class MainHandler(BaseHandler):
     def post(self):
+        print('-'*80)
+        print('New request came!')
         # Iter over all simulation and send all
         runner = run_simulation(self.get_user_options())
+
+        # # Working version
+        raport = []
         for i, r in enumerate(runner):
-            self.write(simplejson.dumps([i, r])+"\n",)
+            new = [i, str(r)]
+            raport.append(new)
+
+        message = simplejson.dumps(raport, indent=2*' ')
+        for i in [('\"', ''), ('(', '['), (')', ']'), ("\'", '\"'), ('False', 'false'), ('True', 'true')]:
+            message = message.replace(*i)
+
+        self.write(message)
+
+        # # Don't know what happen ... Strange thing, to solve
+        # raport = []
+        # for i, r in enumerate(runner):
+        #     new = [i, r["H"]]
+        #     print('FOR: ', new)
+        #     raport.append(new)
+        #
+        # for r in raport:
+        #     print('NIE FOR', r)
+        # self.write(simplejson.dumps(raport, indent=2 * ' '))
 
 
 class Application(tornado.web.Application):
@@ -47,10 +73,15 @@ class Application(tornado.web.Application):
 
 
 def main():
+    print('Starting the server!')
     app = Application()
-    app.listen(8888, address='127.0.0.1')
-    IOLoop.instance().start()
 
+    PORT = 8888
+    IP = '127.0.0.1'
+
+    app.listen(PORT, address=IP)
+    print('Working on {}:{}'.format(IP, PORT))
+    IOLoop.instance().start()
 
 if __name__ == '__main__':
 

@@ -11,7 +11,7 @@ MUTE_WRITING = 0
 
 
 def init_text_to_write_receiver(options):
-    with open('sim_agents_log.txt', 'w') as file:
+    with open('logs/sim_agents_log_'+str(time.time())+'.txt', 'w') as file:
 
         file.write(options)
         file.write("\n")
@@ -61,6 +61,10 @@ def person_walking(self, s):
     self.env.walking_people += s
 
 
+def person_outside(self, s):
+    self.env.at_outside_hotel += s
+
+
 def check_if_trip_is_over(self, trip_duration):
     return self.env.now >= trip_duration
 
@@ -93,12 +97,15 @@ def check_time_3(now, start, end):
     return check_time_alg(now, start, end)
 
 
-def calculate_distance(from_pos, to_pos):
-    return math.sqrt((to_pos[0]-from_pos[0])**2 + (to_pos[1]-from_pos[1])**2)
+def calculate_distance(from_pos, to_pos, env=None):
+    distance = math.sqrt((to_pos[0]-from_pos[0])**2 + (to_pos[1]-from_pos[1])**2)
+    if env:
+        env.walked_meters += distance
+    return distance
 
 
-def calculate_walking_time(from_pos, to_pos, avg_meters_in_min):
-    distance = calculate_distance(from_pos, to_pos)
+def calculate_walking_time(from_pos, to_pos, avg_meters_in_min, env=None):
+    distance = calculate_distance(from_pos, to_pos, env)
     # print("Distance "+str(int(distance)))
     return distance//avg_meters_in_min + 1
 
