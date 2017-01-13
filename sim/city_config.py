@@ -2,7 +2,7 @@
 from simpy import Resource
 import simplejson
 
-from ._own_functions import check_time_2, check_time_3, convert_time_to_min
+from .own_functions import check_time_2, check_time_3, convert_time_to_min
 
 
 class Hotel(Resource):

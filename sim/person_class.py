@@ -2,7 +2,7 @@
 import simpy
 import random as ra
 
-from ._own_functions import *
+from .own_functions import *
 
 
 class Person(object):

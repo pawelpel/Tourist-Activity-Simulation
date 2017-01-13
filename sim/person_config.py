@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.5
 import random
 
-from ._own_functions import time_to_min
+from .own_functions import time_to_min
 
 # SOURCE
 # http://www.mot.krakow.pl/media/badanie-ruchu-turystycznego/badania_ruch_tur_2015.pdf

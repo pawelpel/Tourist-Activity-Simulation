@@ -3,7 +3,7 @@ import simpy
 import simplejson
 import random
 
-from ._own_functions import time_to_min, init_text_to_write_receiver, min_to_date
+from .own_functions import time_to_min, init_text_to_write_receiver, min_to_date
 from .city_config import get_city_config
 from .person_class import Person
 from .person_config import get_person_config
